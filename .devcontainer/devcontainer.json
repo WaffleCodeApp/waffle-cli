@@ -1,0 +1,27 @@
+{
+  "name": "py-n",
+  "dockerComposeFile": "dev-docker-compose.yml",
+  "service": "c",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "forwardPorts": [],
+  "postCreateCommand": "bash .devcontainer/py-cleanup.sh && pip3 install --user -r .devcontainer/dev-requirements.txt && bash .devcontainer/dev-install.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bierner.markdown-preview-github-styles",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "GitHub.vscode-pull-request-github",
+        "GitHub.vscode-github-actions"
+      ]
+    }
+  }
+}

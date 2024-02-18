@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  # this is the container that vscode will use as the coding environment
+  c:
+    build:
+      context: .
+    tty: true
+
+    volumes:
+      - ../..:/workspaces:cached
+
+      # NOTE: AWS CLI looks for authentication tokens at this location
+      # so mapping it from localhost:
+      - ../.aws:/home/vscode/.aws
+
+    # prevents things from shutting down after the process ends.
+    command: sleep infinity
+
+    # environment:
+    #   - DATABASE_URL_OVERRIDE="postgresql://root:root@db:5432/db?schema=public"
+
+    # Note: env vars defined in the .env file must not overlap
+    # with the variables defined environment section
+    env_file:
+      - ../.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
