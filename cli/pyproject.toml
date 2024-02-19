@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dask-cli"
+name = "waffle-cli"
 version = "0.0.1"
 description = "DIY AWS SOC II Type 2 Kit CLI"
 authors = ["Gergely Borgulya <gergely@borgulya.hu>"]
@@ -17,12 +17,12 @@ python = "~3.11"
 pydantic = "^2.6.1"
 awscli = "^1.32.44"
 
-# [tool.poetry.dependencies.dask_cli]
+# [tool.poetry.dependencies.waffle_cli]
 # path = "."
 # develop = true
 
 [tool.poetry.scripts]
-dask = 'dask_cli.cli:main'
+waffle = 'waffle_cli.cli:main'
 
 [build-system]
 requires = ["poetry-core"]
