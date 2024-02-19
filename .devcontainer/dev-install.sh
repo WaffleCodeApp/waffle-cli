@@ -1,9 +1,6 @@
 #!/bin/bash
 
-cd cli
-pip3 install --user -r requirements.txt
-cd ..
-
-cd sdk
-pip3 install --user -r requirements.txt
-cd ..
+python -m venv .venv
+source .venv/bin/activate
+pip3 install -r .devcontainer/dev-requirements.txt
+poetry completions bash >> ~/.bash_completion

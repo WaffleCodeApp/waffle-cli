@@ -2,4 +2,4 @@ autopep8
 black
 pylint
 mypy
-pip-tools
+poetry

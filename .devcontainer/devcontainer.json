@@ -9,7 +9,7 @@
     }
   },
   "forwardPorts": [],
-  "postCreateCommand": "bash .devcontainer/py-cleanup.sh && pip3 install --user -r .devcontainer/dev-requirements.txt && bash .devcontainer/dev-install.sh",
+  "postCreateCommand": "bash .devcontainer/dev-install.sh",
   "customizations": {
     "vscode": {
       "extensions": [

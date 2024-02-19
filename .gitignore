@@ -19,6 +19,11 @@ yarn-error.log*
 
 __pycache__
 .python_history
+.venv
+
+*/dist/*
+!*/dist/.keep
+
 
 .bash_history
 
