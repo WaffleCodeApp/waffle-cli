@@ -1,8 +1,8 @@
 from .command_type import Command
-from .add_local_aws_profile import ConfigureAwsProfile
+from .configure_aws_profile import ConfigureAwsProfile
 
 
-COMMANDS: list[Command] = [ConfigureAwsProfile]
+COMMANDS: list[Command] = [ConfigureAwsProfile()]
 
 
 def get_command(name: str) -> Command:

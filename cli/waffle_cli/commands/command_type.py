@@ -1,25 +1,21 @@
 from argparse import ArgumentParser
 from typing import Any, Protocol
-from abc import abstractmethod
 
 
 class Command(Protocol):
-    @staticmethod
-    @abstractmethod
-    def get_name() -> str:
-        raise NotImplementedError
+    name: str
+    description: str
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.name
+
+    @classmethod
+    def get_descrtiption(cls) -> str:
+        return cls.description
 
     @staticmethod
-    @abstractmethod
-    def get_descrtiption() -> str:
-        raise NotImplementedError
+    def arg_parser(parser: ArgumentParser) -> None: ...
 
     @staticmethod
-    @abstractmethod
-    def arg_parser(parser: ArgumentParser) -> None:
-        raise NotImplementedError
-
-    @staticmethod
-    @abstractmethod
-    def execute(**_: dict[str, Any]) -> None:
-        raise NotImplementedError
+    def execute(**_: dict[str, Any]) -> None: ...
