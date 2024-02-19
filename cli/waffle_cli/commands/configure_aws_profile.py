@@ -18,6 +18,6 @@ class ConfigureAwsProfile(Command):
         )
 
     @staticmethod
-    def execute(**kw: dict[str, Any]) -> None:
+    def execute(**kw: Any) -> None:
         profile = kw.get("profile")
         subprocess.run(f"aws configure --profile {profile}".split())

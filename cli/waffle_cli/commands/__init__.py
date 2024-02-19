@@ -1,8 +1,9 @@
 from .command_type import Command
 from .configure_aws_profile import ConfigureAwsProfile
+from .create_new_deployment import CreateNewDeployment
 
 
-COMMANDS: list[Command] = [ConfigureAwsProfile()]
+COMMANDS: list[Command] = [ConfigureAwsProfile(), CreateNewDeployment()]
 
 
 def get_command(name: str) -> Command:
