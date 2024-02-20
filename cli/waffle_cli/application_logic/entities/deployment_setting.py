@@ -14,7 +14,7 @@ from .stack_settings.db_stack_setting import DnStackSetting
 
 class DeploymentSetting(BaseModel):
     deployment_id: str
-    aws_region: str | None = None
+    aws_region: str | None = "us-east-1"
     deployment_type: DeploymentType | None = None
     ns_list: list[str] | None = None
     full_domain_name: str | None = None
