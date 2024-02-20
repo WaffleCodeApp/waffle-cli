@@ -7,10 +7,13 @@ from .deployment_settings_with_json import DeploymentSettingsWithJson
 from .hosted_zones_with_r53 import HostedZonesWithRoute53
 
 
-class GatewayImplementations(Gateways):
+class _GatewayImplementations(Gateways):
     deployment_settings: DeploymentSettings
     hosted_zones: HostedZones
 
     def __init__(self) -> None:
         self.deployment_settings = DeploymentSettingsWithJson()
         self.hosted_zones = HostedZonesWithRoute53()
+
+
+gateway_implementations = _GatewayImplementations()

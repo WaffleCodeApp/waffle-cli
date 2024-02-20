@@ -1,6 +1,9 @@
 from argparse import ArgumentParser
 import subprocess
 from typing import Any
+
+from ..application_logic.gateway_interfaces import Gateways
+from ..gateways import gateway_implementations
 from .command_type import Command
 
 
@@ -11,10 +14,13 @@ class ConfigureAwsProfile(Command):
     )
 
     @staticmethod
-    def arg_parser(parser: ArgumentParser) -> None:
+    def arg_parser(
+        parser: ArgumentParser, gateways: Gateways = gateway_implementations
+    ) -> None:
         parser.add_argument(
             "deployment_id",
-            help="Deployment ID, like for example prod, dev, test, qa, etc.",
+            help="An existing deployment ID that you add local credentials for",
+            choices=gateways.deployment_settings.get_names(),
         )
 
     @staticmethod

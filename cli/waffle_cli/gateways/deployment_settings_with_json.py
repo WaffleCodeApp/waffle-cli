@@ -1,3 +1,4 @@
+import os
 from ..application_logic.entities.deployment_setting import DeploymentSetting
 from ..application_logic.gateway_interfaces.deployment_settings import (
     DeploymentSettings,
@@ -25,3 +26,6 @@ class DeploymentSettingsWithJson(DeploymentSettings):
                 return DeploymentSetting.model_validate_json(settings_data)
         except FileNotFoundError:
             return None
+
+    def get_names(self) -> list[str]:
+        return [f[:-5] for f in os.listdir(SETTINGS_DIR) if f.endswith(".json")]

@@ -1,13 +1,17 @@
 from .command_type import Command
-from .configure_aws_profile import ConfigureAwsProfile
 from .create_new_deployment import CreateNewDeployment
+from .list_deployments import ListDeployments
+from .configure_aws_profile import ConfigureAwsProfile
 from .configure_deployment_domain import ConfigureDeploymentDomain
+from .set_deployment_type import SetDeploymentType
 
 
 COMMANDS: list[Command] = [
-    ConfigureAwsProfile(),
     CreateNewDeployment(),
+    ListDeployments(),
+    ConfigureAwsProfile(),
     ConfigureDeploymentDomain(),
+    SetDeploymentType(),
 ]
 
 

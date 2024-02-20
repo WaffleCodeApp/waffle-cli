@@ -23,7 +23,7 @@ def _get_command_parser(with_help: bool, command: str | None = None):
     )
     command_parser.add_argument(
         "command",
-        help="CLI command name",
+        help="The selected command to run",
         choices=[c.get_name() for c in COMMANDS],
         metavar=command or "command",
     )
