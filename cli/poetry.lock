@@ -12,6 +12,17 @@ files = [
 ]
 
 [[package]]
+name = "awacs"
+version = "2.4.1"
+description = "AWS Access Policy Language creation library"
+optional = false
+python-versions = ">=3.7.0"
+files = [
+    {file = "awacs-2.4.1-py3-none-any.whl", hash = "sha256:8c54470f6a2d45de1ec2907417b46f791e44bf6e7d2d5a581ca1d5153b3ea9e6"},
+    {file = "awacs-2.4.1.tar.gz", hash = "sha256:b0da356ae56374ea872c6cdb00946bb22e9cd817c3f3ad6b008019e3a45d8040"},
+]
+
+[[package]]
 name = "awscli"
 version = "1.32.45"
 description = "Universal Command Line Environment for AWS."
@@ -67,6 +78,36 @@ urllib3 = {version = ">=1.25.4,<2.1", markers = "python_version >= \"3.10\""}
 
 [package.extras]
 crt = ["awscrt (==0.19.19)"]
+
+[[package]]
+name = "cfn-flip"
+version = "1.3.0"
+description = "Convert AWS CloudFormation templates between JSON and YAML formats"
+optional = false
+python-versions = "*"
+files = [
+    {file = "cfn_flip-1.3.0-py3-none-any.whl", hash = "sha256:faca8e77f0d32fb84cce1db1ef4c18b14a325d31125dae73c13bcc01947d2722"},
+    {file = "cfn_flip-1.3.0.tar.gz", hash = "sha256:003e02a089c35e1230ffd0e1bcfbbc4b12cc7d2deb2fcc6c4228ac9819307362"},
+]
+
+[package.dependencies]
+Click = "*"
+PyYAML = ">=4.1"
+six = "*"
+
+[[package]]
+name = "click"
+version = "8.1.7"
+description = "Composable command line interface toolkit"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "colorama"
@@ -339,6 +380,24 @@ files = [
 ]
 
 [[package]]
+name = "troposphere"
+version = "4.6.0"
+description = "AWS CloudFormation creation library"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "troposphere-4.6.0-py3-none-any.whl", hash = "sha256:9e641e5c0fa174cfa6f75b8fd505ca85ee6e57ee248330542ac2f95555e6c6d5"},
+    {file = "troposphere-4.6.0.tar.gz", hash = "sha256:3a5f13fd6217f5c59260c6a469bbe2c0d7e6cc09ccdf4f7a0aac5a8ccdcb3704"},
+]
+
+[package.dependencies]
+awacs = {version = ">=2.0.0", optional = true, markers = "extra == \"policy\""}
+cfn-flip = ">=1.0.2"
+
+[package.extras]
+policy = ["awacs (>=2.0.0)"]
+
+[[package]]
 name = "typing-extensions"
 version = "4.9.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -369,4 +428,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "0eff4215739340c3e717038b5812bc46a936c08157e75b75df3f6097a1aae082"
+content-hash = "c31950b29c8b7d64b2e5feba88d83eff3913624a314d55599615fa1b6462811f"

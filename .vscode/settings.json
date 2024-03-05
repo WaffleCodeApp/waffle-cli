@@ -4,7 +4,7 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
         "editor.insertSpaces": true,
-        "editor.tabSize": 2
+        "editor.tabSize": 4
     },
     "terminal.integrated.profiles.linux": {
         "bash": {
@@ -14,28 +14,28 @@
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
+          "source.fixAll.eslint": "always"
         },
         "editor.formatOnSave": true
       },
       "[javascriptreact]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
+          "source.fixAll.eslint": "always"
         },
         "editor.formatOnSave": true
       },
       "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
+          "source.fixAll.eslint": "always"
         },
         "editor.formatOnSave": true
       },
       "[typescriptreact]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
+          "source.fixAll.eslint": "always"
         },
         "editor.formatOnSave": true
       },
@@ -52,5 +52,8 @@
           "source.fixAll.eslint": "explicit"
         }
       },
-      "python.analysis.autoImportCompletions": true
+      "python.analysis.autoImportCompletions": true,
+      "python.analysis.extraPaths": [
+        "./cli/waffle_cli"
+      ]
   }

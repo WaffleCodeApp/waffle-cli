@@ -16,7 +16,7 @@
 ### Cloudformation Stack
 
 
-## Creating a new deployment from scratch
+## Quickstart: new deployment from scratch
 
 
 ### Creating a settings file
@@ -27,11 +27,7 @@ in the current `.waffle` folder: it's going to be a `.json` file with the chosen
 For the choice of `deployment id` check out the terminology above for detailed explanation. Here well use `dev` in the examples below.
 
 ```bash
-waffle create_new_deployment dev
-```
-
-```bash
-waffle set_deployment_type dev DEV
+waffle create_deployment_settings dev DEV
 ```
 
 ### AWS credentials for the AWS account to deploy to
@@ -43,9 +39,22 @@ waffle configure_aws_profile dev
 ### Deploy DNS settings and SSL certification
 
 ```bash
-waffle configure_deployment_domain dev
+waffle configure_deployment_domain dev dev.example.com
 ```
 
 ```bash
 waffle create_deployment_certificate dev
 ```
+
+
+# TODO
+
+CICD trigger:
+- with HTTP endpoint + limited api key
+- AWS API + creating limited IAM user with access tokens
+
+Notes:
+- ECS service port hardcoded to 80
+- DB alarms:
+    - free storage alarm at 5GB
+    - freeable mem at 10MB

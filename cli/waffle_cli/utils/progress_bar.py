@@ -1,5 +1,7 @@
 import sys
 
+from .std_colors import BLUE, BOLD, NEUTRAL
+
 show_progress_bar_value = False
 BAR_LENGTH = 40
 MAX_LENGTH = 120
@@ -19,7 +21,7 @@ def show_progress(current: int, maximum: int, text: str) -> None:
     sys.stdout.write("".join(["\b \b" for _ in range(MAX_LENGTH)]))
 
     prefix = f"{int(100 * current / maximum)}% "
-    sys.stdout.write(prefix)
+    sys.stdout.write(BLUE + prefix)
 
     for i in range(BAR_LENGTH):
         if i < int(BAR_LENGTH * current / maximum):
@@ -29,7 +31,7 @@ def show_progress(current: int, maximum: int, text: str) -> None:
         else:
             sys.stdout.write(".")
 
-    suffix = f" {current} / {maximum} | {text}"
-    sys.stdout.write(suffix[: MAX_LENGTH - BAR_LENGTH - len(prefix)])
+    suffix = f" {current} / {maximum} | {BOLD}{text}"
+    sys.stdout.write(suffix[: MAX_LENGTH - BAR_LENGTH - len(prefix)] + NEUTRAL)
 
     sys.stdout.flush()
