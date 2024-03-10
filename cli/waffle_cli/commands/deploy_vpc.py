@@ -148,7 +148,6 @@ class DeployVpc(Command):
                 secondary_public_cidr=setting.vpc_stack_setting.secondary_public_cidr,
             ),
             stack_type=StackType.vpc,
-            # pipeline_name: str | None = None,
         )
 
         setting.vpc_stack_setting.cfn_stack_id = cfn_stack_id
