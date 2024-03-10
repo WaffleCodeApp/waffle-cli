@@ -21,3 +21,29 @@ def generate_api_stack_json() -> str:
     Outputs(t, api_gw, params, d)
 
     return t.to_json()
+
+
+def generate_api_parameter_list(
+    deployment_id: str,
+    full_domain_name: str,
+    api_subdomain: str,
+    certificate_arn: str,
+) -> list[dict[str, str]]:
+    return [
+        {
+            "ParameterKey": "DeploymentId",
+            "ParameterValue": deployment_id,
+        },
+        {
+            "ParameterKey": "FullDomainName",
+            "ParameterValue": full_domain_name,
+        },
+        {
+            "ParameterKey": "BackendApiHostname",
+            "ParameterValue": api_subdomain,
+        },
+        {
+            "ParameterKey": "GenericCertificateArn",
+            "ParameterValue": certificate_arn,
+        },
+    ]
