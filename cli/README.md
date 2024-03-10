@@ -56,6 +56,11 @@ waffle deploy_vpc dev
 waffle deploy_auth dev
 ```
 
+```bash
+waffle deploy_api dev
+```
+
+
 
 # TODO
 
