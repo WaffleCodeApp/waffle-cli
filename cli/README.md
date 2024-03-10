@@ -46,6 +46,16 @@ waffle configure_deployment_domain dev dev.example.com
 waffle create_deployment_certificate dev
 ```
 
+### Deploy foundational stacks
+
+```bash
+waffle deploy_vpc dev
+```
+
+```bash
+waffle deploy_auth dev
+```
+
 
 # TODO
 

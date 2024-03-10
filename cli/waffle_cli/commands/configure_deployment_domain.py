@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from typing import Any
+import uuid
 from ..application_logic.entities.deployment_setting import DeploymentSetting
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
@@ -41,6 +42,8 @@ class ConfigureDeploymentDomain(Command):
             raise Exception("setting not found for deployment_id")
         if setting.ns_list:
             raise Exception("Domain is already set up")
+        if not setting.deployment_type:
+            raise Exception("Deployment type is not set up yet")
 
         ns_list = gateways.hosted_zones.create_hosted_zone_and_get_ns_list(
             deployment_id=deployment_id, full_domain_name=full_domain_name
@@ -48,5 +51,9 @@ class ConfigureDeploymentDomain(Command):
 
         setting.full_domain_name = full_domain_name
         setting.ns_list = ns_list
+
+        setting.template_bucket_name = f'{full_domain_name.replace(".","-")}-{str(setting.deployment_type.value)}-{str(
+            uuid.uuid3(uuid.NAMESPACE_DNS, full_domain_name)
+        )}'
 
         gateways.deployment_settings.create_or_update(setting)

@@ -18,6 +18,7 @@ class DeploymentSetting(BaseModel):
     deployment_type: DeploymentType | None = None
     ns_list: list[str] | None = None
     full_domain_name: str | None = None
+    template_bucket_name: str | None = None
     generic_certificate_arn: str | None = None
 
     vpc_stack_setting: VpcStackSetting | None = None

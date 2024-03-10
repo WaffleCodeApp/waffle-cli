@@ -28,6 +28,7 @@ class Parameters:
                 "AuthUserInvitationSMSText",
                 Description="Text to be used in invitation SMS messages",
                 Type="String",
+                Default="Waffle: {username}, your invitation code is {####}",
             )
         )
 
@@ -36,6 +37,7 @@ class Parameters:
                 "AuthUserAuthenticationSMSText",
                 Description="Text to be used in login SMS messages",
                 Type="String",
+                Default="Waffle: {username}, your verification code is {####}",
             )
         )
 
@@ -44,5 +46,6 @@ class Parameters:
                 "AuthUserVerificationSMSText",
                 Description="Text to be used in verification SMS messages",
                 Type="String",
+                Default="Waffle: {username}, your verification code is {####}",
             )
         )
