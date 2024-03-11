@@ -4,7 +4,7 @@ title: Introduction
 
 # Waffle CLI
 
-Waffle enables one deploy a secrure foundation, and hosting for webapplications' backend and frontend components in AWS.
+Waffle helps one deploy a secrure foundation for web applications and host their backend and frontend components using AWS.
 
 To deploy a sample application to your AWS account, checkout the [Quickstart](quickstart). To deploy your own project, refer to [Get Started](get_started/index).
 
