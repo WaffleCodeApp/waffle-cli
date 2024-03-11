@@ -29,6 +29,7 @@ To kick off a B2B web-project it's hard (if possible at all) to meet all the usu
 ### Alternatives to Waffle.
 
 There are many:
+
 - **AWS, Azure:** Working with low-level infrastructure-as-services like AWS or Azure require a high level of related expertise. It doesn't only take way too much time to build a suitable cloud infrastructure compared to the webapplication that's being hosted, but you also need to pay for the related engineering. This is approach is suitable if you already have a strong devops and infrastructure team. What you might miss from the goals above: kicking off fast and cheap.
 - **AWS SAM:** although we can think about it as a simplification-layer for building applicaitons with serverless cloud infrastructure, it still requires significant AWS-specific expertise. And serverless is often not the best choice for a project in the validation-phase. This solution is suitable if you already have engineers with an AWS background and your project best developed for serverless right from the beginning. What you might miss: kicking off fast and cheap.
 - **Digital Ocean, Heroku:** These platform-as-service solutions provide backend services that are similarly easy to set up as doing it with Waffle. They also provide dashboards and control interfaces that are easy to work with without being an infrastructure expert. These solutions' pricing model is designed for small-scale projects. If your project scales up, then the price likely goes up as well. You'll face a decision if you rewrite your project for an infrastructure that better supports scaling, or accept the higher costs. These services are mostly suitable for teams without deep infrastructure and devops related expertise and without planning to scale significantly up. What you might miss: enabling scaling.
@@ -47,4 +48,4 @@ There are many:
 
 ### When not to use Waffle?
 
-Working with Waffle will require you to work with the AWS console. Just instead of figuring it out how it works, things will be set up for you by Waffle.
+Working with Waffle will require you to work with the AWS console. Just instead of figuring it out how it works, things will be set up for you by Waffle. If you don't think you'll project will ever require the components, security and scalability provided by AWS, then Waffle might be an overkill for you.
