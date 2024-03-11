@@ -1,3 +1,11 @@
 site_name: Waffle CLI
+site_url: https://wafflecodeapp.github.io/waffle-cli/
+site_author: Gergely Borgulya
+
+repo_name: WaffleCodeApp/waffle-cli
+repo_url: https://github.com/WaffleCodeApp/waffle-cli
+
 theme:
   name: material
+  features:
+    - navigation.instant
