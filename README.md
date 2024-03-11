@@ -9,4 +9,4 @@ A few of the core principles of Waffle:
 - Open source infrastructure as code. You only pay for your own hosting (requires AWS).
 - No locking in. If your project's scope grows larger than what Waffle provides then you can easily add your custom components or modify Waffle's open source templates as needed.
 
-To deploy a sample application to your AWS account, checkout the quickstart.
+For details checkout the [documentation](https://wafflecodeapp.github.io/waffle-cli/).
