@@ -3,7 +3,6 @@ from troposphere import Parameter, Template  # pyright: ignore[reportMissingType
 
 class Parameters:
     deployment_id: Parameter
-    email_notification_list: Parameter
 
     def __init__(self, t: Template):
         self.deployment_id = t.add_parameter(
