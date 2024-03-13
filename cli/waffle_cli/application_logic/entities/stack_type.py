@@ -8,6 +8,7 @@ class StackType(str, Enum):
     alerts = "alerts"
     github = "github"
     deployment = "deployment"
+    db = "db"
     cdn_cicd = "cdn_cicd"
     cfn_cicd = "cfn_cicd"
     ecs_cicd = "ecs_cicd"

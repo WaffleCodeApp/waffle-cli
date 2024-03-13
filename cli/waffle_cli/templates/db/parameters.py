@@ -17,7 +17,6 @@ class Parameters:
     primary_private_subnet_ref: Parameter
     secondary_private_subnet_ref: Parameter
     local_incoming_connections_sg: Parameter
-    # deployment_secret_arn: Parameter
     alerts_sns_ref: Parameter
 
     def __init__(self, t: Template):
@@ -48,7 +47,7 @@ class Parameters:
                 "AllocatedStorageSize",
                 Description="Allocated storage size",
                 Type="String",
-                Default="5",
+                Default="6",  # making it larger than the alarm threshold
             )
         )
 
@@ -143,15 +142,6 @@ class Parameters:
                 Default="",
             )
         )
-
-        # self.deployment_secret_arn = t.add_parameter(
-        #     Parameter(
-        #         "DeploymentSecretArn",
-        #         Description="(optional) The arn of the deployment_secret",
-        #         Type="String",
-        #         Default="",
-        #     )
-        # )
 
         self.alerts_sns_ref = t.add_parameter(
             Parameter(

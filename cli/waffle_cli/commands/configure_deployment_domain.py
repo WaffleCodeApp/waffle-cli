@@ -52,8 +52,8 @@ class ConfigureDeploymentDomain(Command):
         setting.full_domain_name = full_domain_name
         setting.ns_list = ns_list
 
-        setting.template_bucket_name = f'{full_domain_name.replace(".","-")}-{str(setting.deployment_type.value)}-{str(
+        setting.template_bucket_name = f'''{full_domain_name.replace(".","-")}-{str(setting.deployment_type.value)}-{str(
             uuid.uuid3(uuid.NAMESPACE_DNS, full_domain_name)
-        )}'
+        )}'''
 
         gateways.deployment_settings.create_or_update(setting)

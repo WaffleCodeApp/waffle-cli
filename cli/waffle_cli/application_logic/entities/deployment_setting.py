@@ -9,7 +9,7 @@ from .stack_settings.github_stack_setting import GithubStackSetting
 from .stack_settings.cdn_cicd_stack_setting import CdnCicdStackSetting
 from .stack_settings.cfn_cicd_stack_setting import CfnCicdStackSetting
 from .stack_settings.ecs_cicd_stack_setting import EcsCicdStackSetting
-from .stack_settings.db_stack_setting import DnStackSetting
+from .stack_settings.db_stack_setting import DbStackSetting
 
 
 class DeploymentSetting(BaseModel):
@@ -31,4 +31,4 @@ class DeploymentSetting(BaseModel):
     cdn_cicd_stack_settings: list[CdnCicdStackSetting] = []
     cfn_cicd_stack_settings: list[CfnCicdStackSetting] = []
     ecs_cicd_stack_settings: list[EcsCicdStackSetting] = []
-    db_stack_settings: list[DnStackSetting] = []
+    db_stack_settings: list[DbStackSetting] = []

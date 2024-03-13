@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "waffle-cli"
-version = "0.0.1"
+version = "0.0.4"
 description = "Waffle CLI"
 authors = ["Gergely Borgulya <greg@wafflecode.com>"]
 license = "MIT"

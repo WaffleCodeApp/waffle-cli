@@ -1,12 +1,12 @@
 from typing import Any
 from boto3 import Session  # pyright: ignore[reportMissingTypeStubs]
 import botocore  # pyright: ignore[reportMissingTypeStubs]
-from application_logic.entities.stack_settings.stack_setting import (
+from ..application_logic.entities.stack_settings.stack_setting import (
     StackSetting,
 )
-from application_logic.entities.deployment_setting import DeploymentSetting
-from application_logic.entities.stack_type import StackType
-from application_logic.gateway_interfaces.stacks import Stacks
+from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.stack_type import StackType
+from ..application_logic.gateway_interfaces.stacks import Stacks
 
 
 class StacksWithCfn(Stacks):

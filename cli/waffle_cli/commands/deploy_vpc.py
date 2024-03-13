@@ -1,13 +1,13 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from application_logic.entities.deployment_setting import DeploymentSetting
-from application_logic.entities.deployment_type import DeploymentType
-from application_logic.entities.stack_settings.vpc_stack_setting import VpcStackSetting
-from application_logic.entities.stack_type import StackType
-from application_logic.gateway_interfaces import Gateways
-from gateways import gateway_implementations
-from templates.vpc import generate_vpc_parameter_list, generate_vpc_stack_json
+from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_type import DeploymentType
+from ..application_logic.entities.stack_settings.vpc_stack_setting import VpcStackSetting
+from ..application_logic.entities.stack_type import StackType
+from ..application_logic.gateway_interfaces import Gateways
+from ..gateways import gateway_implementations
+from ..templates.vpc import generate_vpc_parameter_list, generate_vpc_stack_json
 from .command_type import Command
 
 

@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from application_logic.entities.deployment_setting import DeploymentSetting
-from application_logic.entities.stack_type import StackType
+from ..entities.deployment_setting import DeploymentSetting
+from ..entities.stack_type import StackType
 
 
 class Stacks(Protocol):

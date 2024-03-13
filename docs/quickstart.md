@@ -55,3 +55,15 @@ waffle deploy_auth dev
 ```bash
 waffle deploy_api dev
 ```
+
+```bash
+waffle deploy_alerts dev
+```
+
+```bash
+waffle deploy_github dev
+```
+
+```bash
+waffle deploy_deployment dev
+```

@@ -1,26 +1,21 @@
 from troposphere import Template  # pyright: ignore[reportMissingTypeStubs]
+from .deployment_secret import DeploymentSecret
 from .parameters import Parameters
-from .alerts_sns import AlertsSns
 
 
-def generate_alerts_stack_json() -> str:
+def generate_deployment_stack_json() -> str:
     t = Template()
     parameters = Parameters(t)
-    AlertsSns(t, parameters)
+    DeploymentSecret(t, parameters)
 
     return t.to_json()
 
-def generate_alerts_parameter_list(
+def generate_deployment_parameter_list(
     deployment_id: str,
-    email_notification_list: str,
 ) -> list[dict[str, str]]:
     return [
         {
             "ParameterKey": "DeploymentId",
             "ParameterValue": deployment_id,
-        },
-        {
-            "ParameterKey": "EmailNotificationList",
-            "ParameterValue": email_notification_list,
         },
     ]
