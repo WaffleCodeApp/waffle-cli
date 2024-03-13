@@ -7,6 +7,7 @@ from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..templates.alerts import generate_alerts_parameter_list, generate_alerts_stack_json
+from ..utils.std_colors import BLUE, BOLD, GREEN, NEUTRAL, RED
 from .command_type import Command
 
 
@@ -49,19 +50,27 @@ class DeployAlerts(Command):
             deployment_id
         )
         if setting is None:
-            raise Exception("setting not found for deployment_id")
+            print(RED + f'Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            raise Exception("Setting not found for deployment_id")
 
-        if not setting.template_bucket_name:
-            raise Exception("Template bucket name is None")
-
-        if not setting.aws_region:
+        if setting.aws_region is None:
+            print(RED + 'AWS region setting not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
             raise Exception("AWS region is None")
 
-        if not setting.deployment_type:
+        if setting.deployment_type is None:
+            print(RED + 'Deployment type setting found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
             raise Exception("Deployment type is None")
 
+        if setting.template_bucket_name is None:
+            print(RED + "Template bucket name setting not found. Please make sure to run configure_deployment_domain first." + NEUTRAL)
+            raise Exception("template_bucket_name is None")
+
+        i_email_list = email_list
         if setting.alerts_stack_setting is None and email_list is None:
-            raise Exception("email_list has to be specified at the first use")
+            print(BLUE + BOLD)
+            i_email_list = input('Please specify the list of email addresses to send alerts to: ')
+            print(NEUTRAL)
+        assert i_email_list is not None
 
         gateways.deployment_template_bucket.create_bucket_if_not_exist(
             deployment_id, setting.template_bucket_name, setting.aws_region
@@ -76,9 +85,8 @@ class DeployAlerts(Command):
         )
 
         if setting.alerts_stack_setting is None:
-            assert email_list is not None
             setting.alerts_stack_setting = AlertsStackSetting(
-                email_notifications=email_list,
+                email_notifications=i_email_list,
             )
 
         gateways.deployment_settings.create_or_update(setting)
@@ -95,3 +103,5 @@ class DeployAlerts(Command):
 
         setting.alerts_stack_setting.cfn_stack_id = cfn_stack_id
         gateways.deployment_settings.create_or_update(setting)
+
+        print(GREEN + 'Done. The deployment typically takes a few minutes.\n' + NEUTRAL)

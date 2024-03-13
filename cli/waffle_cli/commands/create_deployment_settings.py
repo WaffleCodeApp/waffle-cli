@@ -4,6 +4,7 @@ from ..application_logic.entities.deployment_setting import DeploymentSetting
 from ..application_logic.entities.deployment_type import DeploymentType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
+from ..utils.std_colors import GREEN, NEUTRAL, RED
 from .command_type import Command
 
 
@@ -43,7 +44,9 @@ class CreateDeploymentSettings(Command):
             deployment_id
         )
         if setting is not None:
+            print(RED + 'Settings found for this deployment_id. This command only has to be run once per deployment.' + NEUTRAL)
             raise Exception("deployment_id already exists")
+
         gateways.deployment_settings.create_or_update(
             DeploymentSetting(
                 deployment_id=deployment_id, deployment_type=deployment_type
@@ -56,4 +59,6 @@ class CreateDeploymentSettings(Command):
             assert setting is not None
             setting.aws_region = aws_region
             gateways.deployment_settings.create_or_update(setting)
+
+        print(GREEN + 'Done.\n' + NEUTRAL)
 

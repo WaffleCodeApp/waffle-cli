@@ -13,6 +13,7 @@ from ..templates.authentication import (
     generate_auth_stack_json,
     generate_auth_parameter_list,
 )
+from ..utils.std_colors import BLUE, BOLD, GREEN, NEUTRAL, RED
 from .command_type import Command
 
 
@@ -55,20 +56,31 @@ class DeployAuth(Command):
         setting: DeploymentSetting | None = gateways.deployment_settings.get(
             deployment_id
         )
+
         if setting is None:
-            raise Exception("setting not found for deployment_id")
+            print(RED + f'Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            raise Exception("Setting not found for deployment_id")
 
-        if not setting.template_bucket_name:
-            raise Exception("Template bucket name is None")
-
-        if not setting.aws_region:
+        if setting.aws_region is None:
+            print(RED + 'AWS region setting not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
             raise Exception("AWS region is None")
 
-        if not setting.deployment_type:
+        if setting.template_bucket_name is None:
+            print(RED + "Template bucket name setting not found. Please make sure to run configure_deployment_domain first." + NEUTRAL)
+            raise Exception("template_bucket_name is None")
+
+        if setting.deployment_type is None:
+            print(RED + 'Deployment type setting found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
             raise Exception("Deployment type is None")
 
+        i_auth_type = auth_type
         if setting.auth_stack_setting is None and auth_type is None:
-            raise Exception("auth_type has to be specified at the first use")
+            print(BLUE + BOLD)
+            i_auth_type = input("Please specify the authentication type. USERPOOL deploys and AWS Cognito Userpool, while OIDC lets you bring your own authentication service. ")
+            if i_auth_type not in AuthType:
+                raise Exception("Unknown auth type specified")
+            print(NEUTRAL)
+        assert i_auth_type is not None
 
         gateways.deployment_template_bucket.create_bucket_if_not_exist(
             deployment_id, setting.template_bucket_name, setting.aws_region
@@ -83,9 +95,8 @@ class DeployAuth(Command):
         )
 
         if setting.auth_stack_setting is None:
-            assert auth_type is not None
             setting.auth_stack_setting = AuthStackSetting(
-                auth_type=auth_type,
+                auth_type=AuthType[i_auth_type],
             )
 
         gateways.deployment_settings.create_or_update(setting)
@@ -107,3 +118,5 @@ class DeployAuth(Command):
 
         setting.auth_stack_setting.cfn_stack_id = cfn_stack_id
         gateways.deployment_settings.create_or_update(setting)
+
+        print(GREEN + 'Done. The deployment typically takes a few minutes.\n' + NEUTRAL)
