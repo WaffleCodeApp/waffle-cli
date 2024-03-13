@@ -2,7 +2,7 @@ from datetime import datetime
 
 from time import sleep
 from typing import Any
-from boto3 import Session  # type: ignore
+from boto3 import Session  # pyright: ignore[reportMissingTypeStubs]
 from ..application_logic.gateway_interfaces.hosted_zones import HostedZones
 from ..utils.progress_indicator import show_progress
 

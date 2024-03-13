@@ -1,5 +1,5 @@
 from typing import Any
-from boto3 import Session  # type: ignore
+from boto3 import Session  # pyright: ignore[reportMissingTypeStubs]
 from ..application_logic.gateway_interfaces.certs import Certs
 
 
