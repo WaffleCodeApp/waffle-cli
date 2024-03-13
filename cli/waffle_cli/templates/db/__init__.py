@@ -45,3 +45,54 @@ def generate_db_stack_json() -> str:
     Outputs(t, params, secret)
 
     return t.to_json()
+
+def generate_db_parameter_list(
+    deployment_id: str,
+    database_id: str,
+    allocated_storage_size: str | None = None,
+    family: str | None = None,
+    postgres_engine_version: str | None = None,
+    instance_class: str | None = None,
+    snapshot_id: str | None = None,
+    create_replica: str | None = None,
+    db_type: str | None = None,
+) -> list[dict[str, str]]:
+    return [
+        {
+            "ParameterKey": "DeploymentId",
+            "ParameterValue": deployment_id,
+        },
+        {
+            "ParameterKey": "DatabaseId",
+            "ParameterValue": database_id,
+        },
+        {
+            "ParameterKey": "AllocatedStorageSize",
+            "ParameterValue": allocated_storage_size or "",
+        },
+        {
+            "ParameterKey": "Family",
+            "ParameterValue": family or "",
+        },
+        {
+            "ParameterKey": "PostgresEngineVersion",
+            "ParameterValue": postgres_engine_version or "",
+        },
+        {
+            "ParameterKey": "InstanceClass",
+            "ParameterValue": instance_class or "",
+        },
+        {
+            "ParameterKey": "SnaphotId",
+            "ParameterValue": snapshot_id or "",
+        },
+        {
+            "ParameterKey": "CreateReplica",
+            "ParameterValue": create_replica or "",
+        },
+        {
+            "ParameterKey": "DBType",
+            "ParameterValue": db_type or "",
+        }
+    ]
+ 

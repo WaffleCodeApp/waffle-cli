@@ -4,3 +4,4 @@ pylint
 mypy
 poetry
 mkdocs-material
+twine

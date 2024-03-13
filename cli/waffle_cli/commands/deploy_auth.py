@@ -1,15 +1,15 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from application_logic.entities.deployment_setting import DeploymentSetting
-from application_logic.entities.stack_settings.auth_stack_setting import (
+from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.stack_settings.auth_stack_setting import (
     AuthStackSetting,
     AuthType,
 )
-from application_logic.entities.stack_type import StackType
-from application_logic.gateway_interfaces import Gateways
-from gateways import gateway_implementations
-from templates.authentication import (
+from ..application_logic.entities.stack_type import StackType
+from ..application_logic.gateway_interfaces import Gateways
+from ..gateways import gateway_implementations
+from ..templates.authentication import (
     generate_auth_stack_json,
     generate_auth_parameter_list,
 )

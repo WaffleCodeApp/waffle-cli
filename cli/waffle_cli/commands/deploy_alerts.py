@@ -1,12 +1,12 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from application_logic.entities.deployment_setting import DeploymentSetting
-from application_logic.entities.stack_settings.alerts_stack_setting import AlertsStackSetting
-from application_logic.entities.stack_type import StackType
-from application_logic.gateway_interfaces import Gateways
-from gateways import gateway_implementations
-from templates.alerts import generate_alerts_parameter_list, generate_alerts_stack_json
+from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.stack_settings.alerts_stack_setting import AlertsStackSetting
+from ..application_logic.entities.stack_type import StackType
+from ..application_logic.gateway_interfaces import Gateways
+from ..gateways import gateway_implementations
+from ..templates.alerts import generate_alerts_parameter_list, generate_alerts_stack_json
 from .command_type import Command
 
 
