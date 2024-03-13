@@ -50,12 +50,12 @@ def generate_db_parameter_list(
     deployment_id: str,
     database_id: str,
     allocated_storage_size: str | None = None,
+    db_type: str | None = None,
     family: str | None = None,
     postgres_engine_version: str | None = None,
     instance_class: str | None = None,
-    snapshot_id: str | None = None,
     create_replica: str | None = None,
-    db_type: str | None = None,
+    snapshot_id: str | None = None,
 ) -> list[dict[str, str]]:
     return [
         {

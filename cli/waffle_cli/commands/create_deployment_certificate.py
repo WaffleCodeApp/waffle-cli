@@ -3,6 +3,7 @@ from typing import Any
 from ..application_logic.entities.deployment_setting import DeploymentSetting
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
+from ..utils.std_colors import GREEN, NEUTRAL, RED
 from .command_type import Command
 
 
@@ -32,16 +33,20 @@ class CreateDeploymentCertificate(Command):
             deployment_id
         )
         if setting is None:
-            raise Exception("setting not found for deployment_id")
+            print(RED + f'Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            raise Exception("Setting not found for deployment_id")
+
+        if setting.aws_region is None:
+            print(RED + 'AWS region setting not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            raise Exception("AWS region is None")
+
+        if setting.full_domain_name is None:
+            print(RED + "Full domain name setting not found. Please make sure to run configure_deployment_domain first." + NEUTRAL)
+            raise Exception("full_domain_name is None")
 
         if setting.generic_certificate_arn:
+            print(RED + 'The generic certificate ARN found in the settings. This indicates that this command has already been run for this deployment.' + NEUTRAL)
             raise Exception("Certificate already created")
-
-        if not setting.full_domain_name:
-            raise Exception("Full domain name is None")
-
-        if not setting.aws_region:
-            raise Exception("AWS region is None")
 
         generic_certificate_arn = gateways.certs.request_cert_and_get_arn(
             deployment_id=deployment_id,
@@ -52,3 +57,5 @@ class CreateDeploymentCertificate(Command):
         setting.generic_certificate_arn = generic_certificate_arn
 
         gateways.deployment_settings.create_or_update(setting)
+
+        print(GREEN + 'Done. The certification validation may take a few minutes.\n' + NEUTRAL)

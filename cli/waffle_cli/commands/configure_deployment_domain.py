@@ -4,6 +4,7 @@ import uuid
 from ..application_logic.entities.deployment_setting import DeploymentSetting
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
+from ..utils.std_colors import BLUE, BOLD, GREEN, NEUTRAL, RED
 from .command_type import Command
 
 
@@ -39,11 +40,16 @@ class ConfigureDeploymentDomain(Command):
             deployment_id
         )
         if setting is None:
-            raise Exception("setting not found for deployment_id")
+            print(RED + f'Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            raise Exception("Setting not found for deployment_id")
+
+        if setting.deployment_type is None:
+            print(RED + 'Deployment type setting found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            raise Exception("Deployment type is None")
+
         if setting.ns_list:
+            print(RED + 'NS related settings found, which indicates that configure_deployment_domain has already been run.' + NEUTRAL)
             raise Exception("Domain is already set up")
-        if not setting.deployment_type:
-            raise Exception("Deployment type is not set up yet")
 
         ns_list = gateways.hosted_zones.create_hosted_zone_and_get_ns_list(
             deployment_id=deployment_id, full_domain_name=full_domain_name
@@ -57,3 +63,19 @@ class ConfigureDeploymentDomain(Command):
         )}'''
 
         gateways.deployment_settings.create_or_update(setting)
+
+        root_domain = '.'.join(full_domain_name.split('.')[1:])
+
+        print(
+            BLUE +
+            f"Please set up the following DNS record manually for {root_domain}:\n" +
+            "\tRecord type: NS\n" +
+            "\tTTL: 300\n" +
+            "\tValues: (each a separate line)\n" +
+            BOLD +
+            "\n".join([f"\t\t{n}" for n in ns_list]) +
+            f"\n\nIf the DNS provider does't support multi-line values then it has to be {len(ns_list)} separate NS records.\n\n" +
+            NEUTRAL
+        )
+        input('Press ENTER if acknowledged.')
+        print(GREEN + 'Done.\n')
