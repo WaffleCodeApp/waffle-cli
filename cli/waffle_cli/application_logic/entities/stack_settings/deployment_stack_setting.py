@@ -1,5 +1,5 @@
-from .stack_setting import StackSetting
+from pydantic import BaseModel
 
 
-class DeploymentStackSetting(StackSetting):
+class DeploymentStackSetting(BaseModel):
     pass

@@ -1,6 +1,6 @@
-from .stack_setting import StackSetting
+from pydantic import BaseModel
 
 
-class ApiStackSetting(StackSetting):
+class ApiStackSetting(BaseModel):
     subdomain: str = "api"
     custom_certificate_arn: str | None = None

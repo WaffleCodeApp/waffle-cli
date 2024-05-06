@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from typing import Any
 import uuid
 from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..utils.std_colors import BLUE, BOLD, GREEN, NEUTRAL, RED
@@ -31,7 +32,7 @@ class ConfigureDeploymentDomain(Command):
         deployment_id: str | None = None,
         full_domain_name: str | None = None,
         gateways: Gateways = gateway_implementations,
-        **_: Any
+        **_: Any,
     ) -> None:
         assert deployment_id is not None
         assert full_domain_name is not None
@@ -40,15 +41,36 @@ class ConfigureDeploymentDomain(Command):
             deployment_id
         )
         if setting is None:
-            print(RED + f'Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            print(
+                RED
+                + f"Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first."
+                + NEUTRAL
+            )
             raise Exception("Setting not found for deployment_id")
 
-        if setting.deployment_type is None:
-            print(RED + 'Deployment type setting found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
-            raise Exception("Deployment type is None")
+        state: DeploymentState | None = gateways.deployment_states.get(deployment_id)
+        if state is None:
+            print(
+                RED
+                + f"State for {deployment_id} not found. This seems to be a bug."
+                + NEUTRAL
+            )
+            raise Exception("State not found for deployment_id")
 
-        if setting.ns_list:
-            print(RED + 'NS related settings found, which indicates that configure_deployment_domain has already been run.' + NEUTRAL)
+        if setting.full_domain_name == full_domain_name and state.ns_list is not None:
+            print(
+                RED
+                + "Settings found for the specified domain name, which indicates that configure_deployment_domain has already been run."
+                + NEUTRAL
+            )
+            raise Exception("Domain is already set up")
+
+        if (
+            setting.full_domain_name is not None
+            and setting.full_domain_name != full_domain_name
+            and state.ns_list is not None
+        ):
+            print(RED + "Settings found for a different domain name." + NEUTRAL)
             raise Exception("Domain is already set up")
 
         ns_list = gateways.hosted_zones.create_hosted_zone_and_get_ns_list(
@@ -56,26 +78,27 @@ class ConfigureDeploymentDomain(Command):
         )
 
         setting.full_domain_name = full_domain_name
-        setting.ns_list = ns_list
+        state.ns_list = ns_list
 
-        setting.template_bucket_name = f'''{full_domain_name.replace(".","-")}-{str(setting.deployment_type.value)}-{str(
+        state.template_bucket_name = f"""{full_domain_name.replace(".","-")}-{str(
             uuid.uuid3(uuid.NAMESPACE_DNS, full_domain_name)
-        )}'''
+        )}"""
 
         gateways.deployment_settings.create_or_update(setting)
+        gateways.deployment_states.create_or_update(state)
 
-        root_domain = '.'.join(full_domain_name.split('.')[1:])
+        root_domain = ".".join(full_domain_name.split(".")[1:])
 
         print(
-            BLUE +
-            f"Please set up the following DNS record manually for {root_domain}:\n" +
-            "\tRecord type: NS\n" +
-            "\tTTL: 300\n" +
-            "\tValues: (each a separate line)\n" +
-            BOLD +
-            "\n".join([f"\t\t{n}" for n in ns_list]) +
-            f"\n\nIf the DNS provider does't support multi-line values then it has to be {len(ns_list)} separate NS records.\n\n" +
-            NEUTRAL
+            BLUE
+            + f"Please set up the following DNS record manually for {root_domain}:\n"
+            + "\tRecord type: NS\n"
+            + "\tTTL: 300\n"
+            + "\tValues: (each a separate line)\n"
+            + BOLD
+            + "\n".join([f"\t\t{n}" for n in ns_list])
+            + f"\n\nIf the DNS provider does't support multi-line values then it has to be {len(ns_list)} separate NS records.\n\n"
+            + NEUTRAL
         )
-        input('Press ENTER if acknowledged.')
-        print(GREEN + 'Done.\n')
+        input("Press ENTER if acknowledged.")
+        print(GREEN + "Done.\n")

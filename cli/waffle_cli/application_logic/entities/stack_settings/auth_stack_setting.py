@@ -1,5 +1,6 @@
 from enum import Enum
-from .stack_setting import StackSetting
+
+from pydantic import BaseModel
 
 
 class AuthType(str, Enum):
@@ -7,5 +8,5 @@ class AuthType(str, Enum):
     OIDC = "OIDC"
 
 
-class AuthStackSetting(StackSetting):
+class AuthStackSetting(BaseModel):
     auth_type: AuthType = AuthType.OIDC

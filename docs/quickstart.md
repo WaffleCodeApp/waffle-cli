@@ -23,7 +23,7 @@ in the current `.waffle` folder: it's going to be a `.json` file with the chosen
 For the choice of `deployment id` check out the terminology above for detailed explanation. Here well use `dev` in the examples below.
 
 ```bash
-waffle create_deployment_settings dev DEV
+waffle create_deployment_settings dev
 ```
 
 ## Setting up a local AWS profile

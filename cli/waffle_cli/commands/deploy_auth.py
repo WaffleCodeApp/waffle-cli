@@ -1,7 +1,9 @@
 from argparse import ArgumentParser
 from typing import Any
 
+from ..application_logic.entities.cfn_stack_state import CfnStackState
 from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.entities.stack_settings.auth_stack_setting import (
     AuthStackSetting,
     AuthType,
@@ -65,13 +67,18 @@ class DeployAuth(Command):
             print(RED + 'AWS region setting not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
             raise Exception("AWS region is None")
 
-        if setting.template_bucket_name is None:
+        state: DeploymentState | None = gateways.deployment_states.get(deployment_id)
+        if state is None:
+            print(
+                RED
+                + f"State for {deployment_id} not found. This seems to be a bug."
+                + NEUTRAL
+            )
+            raise Exception("State not found for deployment_id")
+
+        if state.template_bucket_name is None:
             print(RED + "Template bucket name setting not found. Please make sure to run configure_deployment_domain first." + NEUTRAL)
             raise Exception("template_bucket_name is None")
-
-        if setting.deployment_type is None:
-            print(RED + 'Deployment type setting found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
-            raise Exception("Deployment type is None")
 
         i_auth_type = auth_type
         if setting.auth_stack_setting is None and auth_type is None:
@@ -83,12 +90,12 @@ class DeployAuth(Command):
         assert i_auth_type is not None
 
         gateways.deployment_template_bucket.create_bucket_if_not_exist(
-            deployment_id, setting.template_bucket_name, setting.aws_region
+            deployment_id, state.template_bucket_name, setting.aws_region
         )
 
         auth_template_url: str = gateways.deployment_template_bucket.upload_obj(
             deployment_id=deployment_id,
-            bucket_name=setting.template_bucket_name,
+            bucket_name=state.template_bucket_name,
             aws_region=setting.aws_region,
             key="auth-template.json",
             content=generate_auth_stack_json(),
@@ -116,7 +123,7 @@ class DeployAuth(Command):
             stack_type=StackType.auth,
         )
 
-        setting.auth_stack_setting.cfn_stack_id = cfn_stack_id
-        gateways.deployment_settings.create_or_update(setting)
+        state.auth_stack_state = CfnStackState(cfn_stack_id=cfn_stack_id)
+        gateways.deployment_states.create_or_update(state)
 
         print(GREEN + 'Done. The deployment typically takes a few minutes.\n' + NEUTRAL)

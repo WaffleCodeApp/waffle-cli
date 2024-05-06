@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from .deployment_type import DeploymentType
 from .stack_settings.vpc_stack_setting import VpcStackSetting
 from .stack_settings.auth_stack_setting import AuthStackSetting
 from .stack_settings.api_stack_setting import ApiStackSetting
@@ -15,11 +14,12 @@ from .stack_settings.db_stack_setting import DbStackSetting
 class DeploymentSetting(BaseModel):
     deployment_id: str
     aws_region: str | None = "us-east-1"
-    deployment_type: DeploymentType | None = None
-    ns_list: list[str] | None = None
+
+    log_retention_days: int = 365
+    soc_alarms_enabled: bool = True
+    backup_retention: int = 365
+
     full_domain_name: str | None = None
-    template_bucket_name: str | None = None
-    generic_certificate_arn: str | None = None
 
     vpc_stack_setting: VpcStackSetting | None = None
     auth_stack_setting: AuthStackSetting | None = None

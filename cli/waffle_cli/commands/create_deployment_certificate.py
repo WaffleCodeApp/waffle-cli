@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from typing import Any
 from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..utils.std_colors import GREEN, NEUTRAL, RED
@@ -25,7 +26,7 @@ class CreateDeploymentCertificate(Command):
     def execute(
         deployment_id: str | None = None,
         gateways: Gateways = gateway_implementations,
-        **_: Any
+        **_: Any,
     ) -> None:
         assert deployment_id is not None
 
@@ -33,19 +34,43 @@ class CreateDeploymentCertificate(Command):
             deployment_id
         )
         if setting is None:
-            print(RED + f'Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            print(
+                RED
+                + f"Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first."
+                + NEUTRAL
+            )
             raise Exception("Setting not found for deployment_id")
 
         if setting.aws_region is None:
-            print(RED + 'AWS region setting not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
+            print(
+                RED
+                + "AWS region setting not found. Please make sure to run create_deployment_settings first."
+                + NEUTRAL
+            )
             raise Exception("AWS region is None")
 
         if setting.full_domain_name is None:
-            print(RED + "Full domain name setting not found. Please make sure to run configure_deployment_domain first." + NEUTRAL)
+            print(
+                RED
+                + "Full domain name setting not found. Please make sure to run configure_deployment_domain first."
+                + NEUTRAL
+            )
             raise Exception("full_domain_name is None")
 
-        if setting.generic_certificate_arn:
-            print(RED + 'The generic certificate ARN found in the settings. This indicates that this command has already been run for this deployment.' + NEUTRAL)
+        state: DeploymentState | None = gateways.deployment_states.get(deployment_id)
+        if state is None:
+            print(
+                RED
+                + f"State for {deployment_id} not found. This seems to be a bug."
+                + NEUTRAL
+            )
+            raise Exception("State not found for deployment_id")
+        if state.generic_certificate_arn:
+            print(
+                RED
+                + "The generic certificate ARN found in the settings. This indicates that this command has already been run for this deployment."
+                + NEUTRAL
+            )
             raise Exception("Certificate already created")
 
         generic_certificate_arn = gateways.certs.request_cert_and_get_arn(
@@ -54,8 +79,12 @@ class CreateDeploymentCertificate(Command):
             aws_region=setting.aws_region,
         )
 
-        setting.generic_certificate_arn = generic_certificate_arn
+        state.generic_certificate_arn = generic_certificate_arn
 
-        gateways.deployment_settings.create_or_update(setting)
+        gateways.deployment_states.create_or_update(state)
 
-        print(GREEN + 'Done. The certification validation may take a few minutes.\n' + NEUTRAL)
+        print(
+            GREEN
+            + "Done. The certification validation may take a few minutes.\n"
+            + NEUTRAL
+        )

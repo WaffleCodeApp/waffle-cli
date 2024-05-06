@@ -1,5 +1,5 @@
-from .stack_setting import StackSetting
+from pydantic import BaseModel
 
 
-class AlertsStackSetting(StackSetting):
+class AlertsStackSetting(BaseModel):
     email_notifications: str

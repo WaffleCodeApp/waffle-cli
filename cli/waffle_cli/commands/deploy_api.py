@@ -1,7 +1,9 @@
 from argparse import ArgumentParser
 from typing import Any
 
+from ..application_logic.entities.cfn_stack_state import CfnStackState
 from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.entities.stack_settings.api_stack_setting import ApiStackSetting
 from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
@@ -56,15 +58,20 @@ class DeployApi(Command):
             print(RED + 'AWS region setting not found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
             raise Exception("AWS region is None")
 
-        if setting.deployment_type is None:
-            print(RED + 'Deployment type setting found. Please make sure to run create_deployment_settings first.' + NEUTRAL)
-            raise Exception("Deployment type is None")
-
         if setting.full_domain_name is None:
             print(RED + "Full domain name setting not found. Please make sure to run configure_deployment_domain first." + NEUTRAL)
             raise Exception("full_domain_name is None")
 
-        if setting.template_bucket_name is None:
+        state: DeploymentState | None = gateways.deployment_states.get(deployment_id)
+        if state is None:
+            print(
+                RED
+                + f"State for {deployment_id} not found. This seems to be a bug."
+                + NEUTRAL
+            )
+            raise Exception("State not found for deployment_id")
+
+        if state.template_bucket_name is None:
             print(RED + "Template bucket name setting not found. Please make sure to run configure_deployment_domain first." + NEUTRAL)
             raise Exception("template_bucket_name is None")
 
@@ -75,7 +82,7 @@ class DeployApi(Command):
             print(NEUTRAL)
 
         i_certificate_arn = certificate_arn
-        if certificate_arn is None and setting.generic_certificate_arn is None:
+        if certificate_arn is None and state.generic_certificate_arn is None:
             print(RED + "Generic certificate setting not found. Please make sure to run create_deployment_certificate first. Alternatively you can specify a custom certificate ARN for the API specifically:" + BLUE + BOLD)
             i_certificate_arn = input('Custom certificate ARN for the API: ')
             print(NEUTRAL)
@@ -94,16 +101,16 @@ class DeployApi(Command):
 
         gateways.deployment_settings.create_or_update(setting)
 
-        certificate_arn = setting.api_stack_setting.custom_certificate_arn or setting.generic_certificate_arn
+        certificate_arn = setting.api_stack_setting.custom_certificate_arn or state.generic_certificate_arn
         assert certificate_arn is not None
 
         gateways.deployment_template_bucket.create_bucket_if_not_exist(
-            deployment_id, setting.template_bucket_name, setting.aws_region
+            deployment_id, state.template_bucket_name, setting.aws_region
         )
 
         api_template_url: str = gateways.deployment_template_bucket.upload_obj(
             deployment_id=deployment_id,
-            bucket_name=setting.template_bucket_name,
+            bucket_name=state.template_bucket_name,
             aws_region=setting.aws_region,
             key="api-template.json",
             content=generate_api_stack_json(),
@@ -124,7 +131,7 @@ class DeployApi(Command):
             stack_type=StackType.api,
         )
 
-        setting.api_stack_setting.cfn_stack_id = cfn_stack_id
-        gateways.deployment_settings.create_or_update(setting)
+        state.api_stack_state = CfnStackState(cfn_stack_id=cfn_stack_id)
+        gateways.deployment_states.create_or_update(state)
 
         print(GREEN + 'Done. The deployment typically takes a few minutes.\n' + NEUTRAL)

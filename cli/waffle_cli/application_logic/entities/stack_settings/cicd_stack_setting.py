@@ -1,10 +1,13 @@
-from .stack_setting import StackSetting
+from pydantic import BaseModel
 
 
-class CicdStackSetting(StackSetting):
+class CicdStackSetting(BaseModel):
     github_owner: str | None = None
     github_repo: str | None = None
     github_commit: str | None = None
     github_branch: str | None = None
 
     pipeline_id: str | None = None
+
+    def get_stack_id(self):
+        return f"db|{self.pipeline_id}"

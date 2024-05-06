@@ -1,7 +1,7 @@
-from .stack_setting import StackSetting
+from pydantic import BaseModel
 
 
-class VpcStackSetting(StackSetting):
+class VpcStackSetting(BaseModel):
     vpc_cidr: str
     primary_private_cidr: str
     secondary_private_cidr: str
