@@ -1,25 +1,29 @@
 from argparse import ArgumentParser
 from typing import Any
 
+
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
-from ..templates.github import (
-    generate_github_parameter_list,
-    generate_github_stack_json,
+from ..templates.authentication import (
+    generate_auth_stack_json,
+    generate_auth_parameter_list,
 )
-from .command_type import Command
 from .utils.deploy_new_stack import deploy_new_stack
+from .command_type import Command
 
-STACK_ID = "waffle-github"
+
+STACK_ID = "waffle-auth-userpool"
 TEMPLATE_NAME = f"{STACK_ID}.json"
 
 
-class DeployGithub(Command):
-    name: str = "deploy_github"
+class DeployAuthUserPool(Command):
+    name: str = "deploy_auth_userpool"
     description: str = (
-        "Generate a CFN template for accessing repositories from GitHub for CICD. "
-        "This stack installs a secret that holds the github credentials. "
-        "This secret is used by CodePipeline components of other stacks."
+        "Generate a CFN template for authentication and deploy it to the selected deployment. "
+        "This stack is required if you want to enable IAM authentication on the API Gateway, "
+        "and use it from a frontend application. This template deploys a Cognito "
+        "User Pool, the user authentication service provided by AWS. IF you with to use a different "
+        "solution, like OIDC authentication, you need to bring your own template for now. "
     )
 
     @staticmethod
@@ -44,8 +48,9 @@ class DeployGithub(Command):
             deployment_id=deployment_id,
             stack_id=STACK_ID,
             template_name_default=TEMPLATE_NAME,
-            generate_stack_json=generate_github_stack_json,
-            parameter_list=generate_github_parameter_list(
+            generate_stack_json=generate_auth_stack_json,
+            parameter_list=generate_auth_parameter_list(
                 deployment_id=deployment_id,
+                create_userpool="True",
             ),
         )

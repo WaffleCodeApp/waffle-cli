@@ -10,4 +10,4 @@ class CicdStackSetting(BaseModel):
     pipeline_id: str | None = None
 
     def get_stack_id(self):
-        return f"db|{self.pipeline_id}"
+        return f"cicd|{self.pipeline_id}"

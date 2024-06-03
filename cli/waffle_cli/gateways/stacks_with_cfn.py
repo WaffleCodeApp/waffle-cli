@@ -1,11 +1,8 @@
 from typing import Any
 from boto3 import Session  # pyright: ignore[reportMissingTypeStubs]
 import botocore  # pyright: ignore[reportMissingTypeStubs]
-from ..application_logic.entities.stack_settings.stack_setting import (
-    StackSetting,
-)
+from ..application_logic.entities.cfn_stack_state import CfnStackState
 from ..application_logic.entities.deployment_setting import DeploymentSetting
-from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces.stacks import Stacks
 
 
@@ -16,36 +13,35 @@ class StacksWithCfn(Stacks):
         )
 
     def _get_cfn_func(
-        self, deployment_id: str, aws_region: str, stack_setting: StackSetting | None
+        self,
+        deployment_id: str,
+        aws_region: str,
+        stack_state: CfnStackState | None,
     ):
         c = self._get_client(deployment_id, aws_region)
-        if stack_setting and stack_setting.cfn_stack_id is None:
+        if stack_state is not None:
             return c.create_stack
         return c.update_stack
 
     def create_or_update_stack(
         self,
+        deployment_setting: DeploymentSetting,
         template_url: str,
-        setting: DeploymentSetting,
+        stack_id: str,
+        stack_state: CfnStackState | None,
         parameters: list[dict[str, str]],
-        stack_type: StackType,
-        pipeline_name: str | None = None,
     ) -> str:
-        if setting.aws_region is None:
+        if deployment_setting.aws_region is None:
             raise Exception("aws_region is not specified")
         f = self._get_cfn_func(
-            setting.deployment_id,
-            setting.aws_region,
-            getattr(setting, f"{stack_type.value}_stack_setting"),
+            deployment_setting.deployment_id,
+            deployment_setting.aws_region,
+            stack_state,
         )
         try:
-            default_name = f"waffle-{setting.deployment_id}-{stack_type.value}" + (
-                f"-{pipeline_name}" if pipeline_name else ""
-            )
             response = f(
                 StackName=(
-                    getattr(setting, f"{stack_type.value}_stack_setting").cfn_stack_id,
-                    default_name,
+                    (stack_state.cfn_stack_id if stack_state is not None else stack_id),
                 ),
                 TemplateURL=template_url,
                 Capabilities=["CAPABILITY_NAMED_IAM"],
@@ -54,11 +50,11 @@ class StacksWithCfn(Stacks):
             return f"{response['StackId']}"
         except botocore.exceptions.ClientError as e:  # type: ignore
             if (
-                getattr(setting, f"{stack_type}_stack_setting").cfn_stack_id
+                stack_state is not None
                 and e.__str__()  # type: ignore
                 == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
             ):
-                return getattr(setting, f"{stack_type}_stack_setting").cfn_stack_id
+                return stack_state.cfn_stack_id
             raise e
 
     # def create_or_update_api_stack(

@@ -1,18 +1,15 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from ..application_logic.entities.cfn_stack_state import CfnStackState
-from ..application_logic.entities.deployment_setting import DeploymentSetting
-from ..application_logic.entities.deployment_state import DeploymentState
-from ..application_logic.entities.stack_settings.vpc_stack_setting import (
-    VpcStackSetting,
-)
-from ..application_logic.entities.stack_type import StackType
+from .utils.deploy_new_stack import deploy_new_stack
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..templates.vpc import generate_vpc_parameter_list, generate_vpc_stack_json
-from ..utils.std_colors import GREEN, NEUTRAL, RED
 from .command_type import Command
+
+
+STACK_ID = "waffle-vpc"
+TEMPLATE_NAME = f"{STACK_ID}.json"
 
 
 class DeployVpc(Command):
@@ -78,67 +75,17 @@ class DeployVpc(Command):
         assert primary_public_cidr is not None
         assert secondary_public_cidr is not None
 
-        setting: DeploymentSetting | None = gateways.deployment_settings.get(
-            deployment_id
-        )
-        if setting is None:
-            raise Exception("setting not found for deployment_id")
-
-        state: DeploymentState | None = gateways.deployment_states.get(deployment_id)
-        if state is None:
-            print(
-                RED
-                + f"State for {deployment_id} not found. This seems to be a bug."
-                + NEUTRAL
-            )
-            raise Exception("State not found for deployment_id")
-        if not state.template_bucket_name:
-            raise Exception("Template bucket name is None")
-
-        if not setting.aws_region:
-            raise Exception("AWS region is None")
-
-        gateways.deployment_template_bucket.create_bucket_if_not_exist(
-            deployment_id, state.template_bucket_name, setting.aws_region
-        )
-
-        vpc_template_url: str = gateways.deployment_template_bucket.upload_obj(
+        deploy_new_stack(
             deployment_id=deployment_id,
-            bucket_name=state.template_bucket_name,
-            aws_region=setting.aws_region,
-            key="vpc-template.json",
-            content=generate_vpc_stack_json(),
-        )
-
-        if setting.vpc_stack_setting is None:
-            setting.vpc_stack_setting = VpcStackSetting(
+            stack_id=STACK_ID,
+            template_name_default=TEMPLATE_NAME,
+            generate_stack_json=generate_vpc_stack_json,
+            parameter_list=generate_vpc_parameter_list(
+                deployment_id=deployment_id,
                 vpc_cidr=vpc_cidr,
                 primary_private_cidr=primary_private_cidr,
                 secondary_private_cidr=secondary_private_cidr,
                 primary_public_cidr=primary_public_cidr,
                 secondary_public_cidr=secondary_public_cidr,
-            )
-        gateways.deployment_settings.create_or_update(setting)
-
-        cfn_stack_id = gateways.stacks.create_or_update_stack(
-            template_url=vpc_template_url,
-            setting=setting,
-            parameters=generate_vpc_parameter_list(
-                deployment_id=setting.deployment_id,
-                vpc_cidr=setting.vpc_stack_setting.vpc_cidr,
-                primary_private_cidr=setting.vpc_stack_setting.primary_private_cidr,
-                secondary_private_cidr=setting.vpc_stack_setting.secondary_private_cidr,
-                primary_public_cidr=setting.vpc_stack_setting.primary_public_cidr,
-                secondary_public_cidr=setting.vpc_stack_setting.secondary_public_cidr,
             ),
-            stack_type=StackType.vpc,
-        )
-
-        state.vpc_stack_state = CfnStackState(cfn_stack_id=cfn_stack_id)
-        gateways.deployment_states.create_or_update(state)
-
-        print(
-            GREEN
-            + "Done. Deploying the CloudFormation template may take a few minutes.\n"
-            + NEUTRAL
         )

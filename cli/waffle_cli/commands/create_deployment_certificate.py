@@ -1,10 +1,9 @@
 from argparse import ArgumentParser
 from typing import Any
 from ..application_logic.entities.deployment_setting import DeploymentSetting
-from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
-from ..utils.std_colors import GREEN, NEUTRAL, RED
+from ..utils.std_colors import NEUTRAL, RED, YELLOW
 from .command_type import Command
 
 
@@ -57,15 +56,7 @@ class CreateDeploymentCertificate(Command):
             )
             raise Exception("full_domain_name is None")
 
-        state: DeploymentState | None = gateways.deployment_states.get(deployment_id)
-        if state is None:
-            print(
-                RED
-                + f"State for {deployment_id} not found. This seems to be a bug."
-                + NEUTRAL
-            )
-            raise Exception("State not found for deployment_id")
-        if state.generic_certificate_arn:
+        if setting.generic_certificate_arn:
             print(
                 RED
                 + "The generic certificate ARN found in the settings. This indicates that this command has already been run for this deployment."
@@ -79,12 +70,12 @@ class CreateDeploymentCertificate(Command):
             aws_region=setting.aws_region,
         )
 
-        state.generic_certificate_arn = generic_certificate_arn
+        setting.generic_certificate_arn = generic_certificate_arn
 
-        gateways.deployment_states.create_or_update(state)
+        gateways.deployment_settings.create_or_update(setting)
 
         print(
-            GREEN
-            + "Done. The certification validation may take a few minutes.\n"
+            YELLOW
+            + "The certification validation may take a few minutes.\n\n"
             + NEUTRAL
         )

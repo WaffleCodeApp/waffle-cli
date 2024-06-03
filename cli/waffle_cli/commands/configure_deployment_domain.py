@@ -2,10 +2,9 @@ from argparse import ArgumentParser
 from typing import Any
 import uuid
 from ..application_logic.entities.deployment_setting import DeploymentSetting
-from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
-from ..utils.std_colors import BLUE, BOLD, GREEN, NEUTRAL, RED
+from ..utils.std_colors import BLUE, BOLD, NEUTRAL, RED
 from .command_type import Command
 
 
@@ -48,16 +47,7 @@ class ConfigureDeploymentDomain(Command):
             )
             raise Exception("Setting not found for deployment_id")
 
-        state: DeploymentState | None = gateways.deployment_states.get(deployment_id)
-        if state is None:
-            print(
-                RED
-                + f"State for {deployment_id} not found. This seems to be a bug."
-                + NEUTRAL
-            )
-            raise Exception("State not found for deployment_id")
-
-        if setting.full_domain_name == full_domain_name and state.ns_list is not None:
+        if setting.full_domain_name == full_domain_name and setting.ns_list is not None:
             print(
                 RED
                 + "Settings found for the specified domain name, which indicates that configure_deployment_domain has already been run."
@@ -68,7 +58,7 @@ class ConfigureDeploymentDomain(Command):
         if (
             setting.full_domain_name is not None
             and setting.full_domain_name != full_domain_name
-            and state.ns_list is not None
+            and setting.ns_list is not None
         ):
             print(RED + "Settings found for a different domain name." + NEUTRAL)
             raise Exception("Domain is already set up")
@@ -78,14 +68,13 @@ class ConfigureDeploymentDomain(Command):
         )
 
         setting.full_domain_name = full_domain_name
-        state.ns_list = ns_list
+        setting.ns_list = ns_list
 
-        state.template_bucket_name = f"""{full_domain_name.replace(".","-")}-{str(
+        setting.template_bucket_name = f"""{full_domain_name.replace(".","-")}-{str(
             uuid.uuid3(uuid.NAMESPACE_DNS, full_domain_name)
         )}"""
 
         gateways.deployment_settings.create_or_update(setting)
-        gateways.deployment_states.create_or_update(state)
 
         root_domain = ".".join(full_domain_name.split(".")[1:])
 
@@ -101,4 +90,3 @@ class ConfigureDeploymentDomain(Command):
             + NEUTRAL
         )
         input("Press ENTER if acknowledged.")
-        print(GREEN + "Done.\n")
