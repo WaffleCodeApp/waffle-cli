@@ -1,9 +1,11 @@
+from time import sleep
 from typing import Any
 from boto3 import Session  # pyright: ignore[reportMissingTypeStubs]
 import botocore  # pyright: ignore[reportMissingTypeStubs]
 from ..application_logic.entities.cfn_stack_state import CfnStackState
 from ..application_logic.entities.deployment_setting import DeploymentSetting
 from ..application_logic.gateway_interfaces.stacks import Stacks
+from ..utils.progress_indicator import show_progress
 
 
 class StacksWithCfn(Stacks):
@@ -57,513 +59,74 @@ class StacksWithCfn(Stacks):
                 return stack_state.cfn_stack_id
             raise e
 
-    # def create_or_update_api_stack(
-    #     self, deployment_id: str, template_url: str, setting: DeploymentSetting
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.api_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.api_stack_id or f"wca-api-{deployment_id}",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 # {
-    #                 #     "ParameterKey": "DeploymentType",
-    #                 #     "ParameterValue": setting.deployment_type,
-    #                 # },
-    #                 {
-    #                     "ParameterKey": "FullDomainName",
-    #                     "ParameterValue": setting.full_domain_name,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "BackendApiHostname",
-    #                     "ParameterValue": setting.api_subdomain,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GenericCertificateArn",
-    #                     "ParameterValue": setting.generic_certificate_arn,
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.api_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.api_stack_id
-    #         raise e
+    def _get_stack_statuses(
+        self,
+        deployment_id: str,
+        aws_region: str,
+    ) -> list[tuple[str, str]]:
+        stacks: list[tuple[str, str]] = []
+        client = self._get_client(deployment_id, aws_region)
+        next_token: str | None = None
+        while True:
+            kw = {}
+            if next_token is not None:
+                kw["NextToken"] = next_token
+            response = client.describe_stacks(**kw)
+            if response["Stacks"]:
+                stacks.extend(
+                    [(s["StackId"], s["StackStatus"]) for s in response["Stacks"]]
+                )
+            if response["NextToken"] is None:
+                break
+            next_token = response["NextToken"]
+        return stacks
 
-    # def create_or_update_misc_stack(
-    #     self, deployment_id: str, template_url: str, setting: DeploymentSetting
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.misc_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.misc_stack_id or f"wca-misc-{deployment_id}",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 # {
-    #                 #     "ParameterKey": "DeploymentType",
-    #                 #     "ParameterValue": setting.deployment_type,
-    #                 # },
-    #                 {
-    #                     "ParameterKey": "EmailNotificationList",
-    #                     "ParameterValue": setting.email_notifications,
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.misc_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.misc_stack_id
-    #         raise e
+    def wait_for_stacks_to_create_or_update(
+        self,
+        deployment_id: str,
+        aws_region: str,
+        cfn_stack_ids: list[str] | None = None,
+    ) -> bool:
 
-    # def create_or_update_alerts_cfn_stack(
-    #     self,
-    #     deployment_id: str,
-    #     template_url: str,
-    #     setting: DeploymentSetting,
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.alerts_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.alerts_stack_id or f"wca-cfn-{deployment_id}-alerts",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DeploymentType",
-    #                     "ParameterValue": setting.deployment_type,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "PipelineId",
-    #                     "ParameterValue": "alerts",
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CICDManualApproval",
-    #                     "ParameterValue": (
-    #                         "False"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "True"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubOwner",
-    #                     "ParameterValue": setting.github_owner,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubRepoName",
-    #                     "ParameterValue": setting.github_repo,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubBranch",
-    #                     "ParameterValue": setting.github_branch,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CommitID",
-    #                     "ParameterValue": setting.github_commit,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "BuildspecPath",
-    #                     "ParameterValue": "alerts/buildspec.yml",
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.alerts_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.alerts_stack_id
-    #         raise e
+        i = 0
+        show_progress(i, "Checking stack statuses...")
+        succeeded: bool = True
+        while True:
+            i += 1
+            stack_statuses = self._get_stack_statuses(
+                deployment_id,
+                aws_region,
+            )
 
-    # def create_or_update_customer_db_stack(
-    #     self,
-    #     deployment_id: str,
-    #     template_url: str,
-    #     setting: DeploymentSetting,
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.customer_db_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.customer_db_stack_id
-    #             or f"wca-db-{deployment_id}-customer",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DeploymentType",
-    #                     "ParameterValue": setting.deployment_type,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DatabaseId",
-    #                     "ParameterValue": "customer",
-    #                 },
-    #                 {
-    #                     "ParameterKey": "Family",
-    #                     "ParameterValue": (
-    #                         "postgres15"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "aurora-postgresql15"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DBType",
-    #                     "ParameterValue": (
-    #                         "rds"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "aurora"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "InstanceClass",
-    #                     "ParameterValue": (
-    #                         "db.t3.micro"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "db.t3.medium"
-    #                     ),
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.customer_db_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.customer_db_stack_id
-    #         raise e
+            if cfn_stack_ids is not None:
+                stack_statuses = [s for s in stack_statuses if s[0] in cfn_stack_ids]
 
-    # def create_or_update_deployer_db_stack(
-    #     self,
-    #     deployment_id: str,
-    #     template_url: str,
-    #     setting: DeploymentSetting,
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.deployer_db_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.deployer_db_stack_id
-    #             or f"wca-db-{deployment_id}-deployer",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DeploymentType",
-    #                     "ParameterValue": setting.deployment_type,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DatabaseId",
-    #                     "ParameterValue": "deployer",
-    #                 },
-    #                 {
-    #                     "ParameterKey": "Family",
-    #                     "ParameterValue": (
-    #                         "postgres15"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "aurora-postgresql15"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DBType",
-    #                     "ParameterValue": (
-    #                         "rds"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "aurora"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "InstanceClass",
-    #                     "ParameterValue": (
-    #                         "db.t3.micro"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "db.t3.medium"
-    #                     ),
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.deployer_db_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.deployer_db_stack_id
-    #         raise e
-
-    # def create_or_update_deployer_ecs_stack(
-    #     self,
-    #     deployment_id: str,
-    #     template_url: str,
-    #     setting: DeploymentSetting,
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.deployer_ecs_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.deployer_ecs_stack_id
-    #             or f"wca-ecs-{deployment_id}-deployer",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DeploymentType",
-    #                     "ParameterValue": setting.deployment_type,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "PipelineId",
-    #                     "ParameterValue": "deployer",
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CICDManualApproval",
-    #                     "ParameterValue": (
-    #                         "False"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "True"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "InstanceCount",
-    #                     "ParameterValue": setting.deployer_instance_count,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubOwner",
-    #                     "ParameterValue": setting.github_owner,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubRepoName",
-    #                     "ParameterValue": setting.github_repo,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubBranch",
-    #                     "ParameterValue": setting.github_branch,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CommitID",
-    #                     "ParameterValue": setting.github_commit,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "BuildspecPath",
-    #                     "ParameterValue": "deployer/buildspec.yml",
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.deployer_ecs_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.deployer_ecs_stack_id
-    #         raise e
-
-    # def create_or_update_admin_app_cfn_stack(
-    #     self,
-    #     deployment_id: str,
-    #     template_url: str,
-    #     setting: DeploymentSetting,
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.admin_app_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.admin_app_stack_id
-    #             or f"wca-cfn-{deployment_id}-admin-app",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DeploymentType",
-    #                     "ParameterValue": setting.deployment_type,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "PipelineId",
-    #                     "ParameterValue": "admin-app",
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CICDManualApproval",
-    #                     "ParameterValue": (
-    #                         "False"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "True"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubOwner",
-    #                     "ParameterValue": setting.github_owner,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubRepoName",
-    #                     "ParameterValue": setting.github_repo,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubBranch",
-    #                     "ParameterValue": setting.github_branch,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CommitID",
-    #                     "ParameterValue": setting.github_commit,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "BuildspecPath",
-    #                     "ParameterValue": "admin_app/buildspec.yml",
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.admin_app_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.admin_app_stack_id
-    #         raise e
-
-    # def create_or_update_admin_web_ui_cdn_stack(
-    #     self,
-    #     deployment_id: str,
-    #     template_url: str,
-    #     setting: DeploymentSetting,
-    # ) -> str:
-    #     f = (
-    #         self._get_client(deployment_id=deployment_id).create_stack
-    #         if setting.admin_web_ui_stack_id is None
-    #         else self._get_client(deployment_id=deployment_id).update_stack
-    #     )
-    #     try:
-    #         response = f(
-    #             StackName=setting.admin_web_ui_stack_id
-    #             or f"wca-cdn-{deployment_id}-admin-web-ui",
-    #             TemplateURL=template_url,
-    #             Capabilities=["CAPABILITY_NAMED_IAM"],
-    #             Parameters=[
-    #                 {
-    #                     "ParameterKey": "DeploymentId",
-    #                     "ParameterValue": setting.deployment_id,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "DeploymentType",
-    #                     "ParameterValue": setting.deployment_type,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "PipelineId",
-    #                     "ParameterValue": "admin-web-ui",
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CICDManualApproval",
-    #                     "ParameterValue": (
-    #                         "False"
-    #                         if setting.deployment_type == DeploymentType.DEV
-    #                         else "True"
-    #                     ),
-    #                 },
-    #                 {
-    #                     "ParameterKey": "FullDomainName",
-    #                     "ParameterValue": setting.full_domain_name,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "WebHostname",
-    #                     "ParameterValue": "www",
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GenericCertificateArn",
-    #                     "ParameterValue": setting.generic_certificate_arn,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubOwner",
-    #                     "ParameterValue": setting.github_owner,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubRepoName",
-    #                     "ParameterValue": setting.github_repo,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "GithubBranch",
-    #                     "ParameterValue": setting.github_branch,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "CommitID",
-    #                     "ParameterValue": setting.github_commit,
-    #                 },
-    #                 {
-    #                     "ParameterKey": "BuildspecPath",
-    #                     "ParameterValue": "admin-web-ui/buildspec.yml",
-    #                 },
-    #             ],
-    #         )
-    #         return f"{response['StackId']}"
-    #     except botocore.exceptions.ClientError as e:  # type: ignore
-    #         if (
-    #             setting.admin_web_ui_stack_id
-    #             and e.__str__()  # type: ignore
-    #             == "An error occurred (ValidationError) when calling the UpdateStack operation: No updates are to be performed."
-    #         ):
-    #             return setting.admin_web_ui_stack_id
-    #         raise e
+            if (
+                len(
+                    [
+                        s
+                        for s in stack_statuses
+                        if s[1] != "CREATE_COMPLETE"
+                        and s[1] != "CREATE_FAILED"
+                        and s[1] != "ROLLBACK_COMPLETE"
+                        and s[1] != "ROLLBACK_FAILED"
+                        and s[1] != "UPDATE_COMPLETE"
+                        and s[1] != "UPDATE_FAILED"
+                        and s[1] != "UPDATE_ROLLBACK_COMPLETE"
+                        and s[1] != "UPDATE_ROLLBACK_FAILED"
+                    ]
+                )
+                == 0
+            ):
+                succeeded = len(
+                    [
+                        s
+                        for s in stack_statuses
+                        if s[1] == "CREATE_COMPLETE" or s[1] == "UPDATE_COMPLETE"
+                    ]
+                ) == len(stack_statuses)
+                break
+            show_progress(i, "Stack are being created or updated...")
+            sleep(10)
+        show_progress(i, "Finished creating or updating stacks...")
+        return succeeded

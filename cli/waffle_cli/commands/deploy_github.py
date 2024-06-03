@@ -35,6 +35,7 @@ class DeployGithub(Command):
     @staticmethod
     def execute(
         deployment_id: str | None = None,
+        wait_to_finish: bool = False,
         gateways: Gateways = gateway_implementations,
         **_: Any,
     ) -> None:
@@ -49,3 +50,12 @@ class DeployGithub(Command):
                 deployment_id=deployment_id,
             ),
         )
+
+        if wait_to_finish:
+            deployment_setting = gateways.deployment_settings.get(deployment_id)
+            assert deployment_setting is not None
+            assert deployment_setting.aws_region is not None
+
+            gateways.stacks.wait_for_stacks_to_create_or_update(
+                deployment_id, deployment_setting.aws_region, [STACK_ID]
+            )

@@ -1,12 +1,16 @@
 from argparse import ArgumentParser
 import re
 from typing import Any
+
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
-from ..utils.std_colors import BLUE, GREEN, NEUTRAL, RED, YELLOW, BOLD
-from . import get_command
+from ..utils.std_colors import BLUE, GREEN, NEUTRAL, RED, YELLOW
 from .command_type import Command
 from .create_deployment_settings import CreateDeploymentSettings
+from .configure_aws_profile import ConfigureAwsProfile
+from .configure_deployment_domain import ConfigureDeploymentDomain
+from .create_deployment_certificate import CreateDeploymentCertificate
+from .deploy_vpc import DeployVpc
 from .deploy_api import DeployApi
 from .deploy_auth_userpool import DeployAuthUserPool
 from .deploy_alerts import DeployAlerts
@@ -46,13 +50,13 @@ class SetupWizard(Command):
         # -------------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + BLUE
+            + f"Choose your deployment id.\n\n"
+            + NEUTRAL
             + "A deployment is a fully-featured complete set of hosted instances of the "
             + "services of your application. Deployments are independent, sharing no resources.\n\n"
-            + BLUE
-            + f"Choose your {BOLD}deployment id{NEUTRAL}.\n"
-            + NEUTRAL
-            + "\tThe deployment id can be any string of your choice. It refers to "
+            + "The deployment id can be any string of your choice. It refers to "
             + "your deployment. It's a common practice to have deployments for each "
             + "major step in your software development life cycle. In this case the "
             + "deployment_id can be the name of the development phase the deployment is "
@@ -67,7 +71,7 @@ class SetupWizard(Command):
 
         CreateDeploymentSettings.execute(deployment_id=deployment_id)
 
-        print(BLUE + f"Choose the AWS region to deploy to.\n" + NEUTRAL)
+        print("\n\n" + BLUE + f"Choose the AWS region to deploy to.\n\n" + NEUTRAL)
 
         aws_region: str = ""
         while True:
@@ -99,13 +103,13 @@ class SetupWizard(Command):
         # -------------------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + NEUTRAL
             + "Deployments typically have slightly different requirements in the different "
             + "SLDC phases. While a production environment is typically required to have "
             + "the logs and backups retained, and alarms set up to indicate risks, a development "
-            + "environment might require cost saving instead."
-            + "Next let's set up default approaches that will be used as default in the stacks "
-            + "that are added later.\n\n"
+            + "environment might require cost saving instead. "
+            + "Next let's set up default settings for the stacks that are added later.\n\n"
             + BLUE
             + f"Default stack settings\n\n"
             + NEUTRAL
@@ -157,7 +161,8 @@ class SetupWizard(Command):
         # -----------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + NEUTRAL
             + "Each deployment has to have access to AWS. The way this tool works if that "
             + "it expects that there is an local AWS profile on the computer running the cli, "
             + "for every deployment. The AWS profile ids are the same as the deployment ids. "
@@ -169,14 +174,15 @@ class SetupWizard(Command):
             + NEUTRAL
         )
 
-        get_command("configure_aws_profile").execute(deployment_id=deployment_id)
+        ConfigureAwsProfile.execute(deployment_id=deployment_id)
 
         # ----------------
         # full_domain_name
         # ----------------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + NEUTRAL
             + "Each deployment has to have a root domain name. Services that have public hostnames "
             + "will be set up to use a subdomain of the deployment's root domain. You have to own "
             + "the parent domain name of the deployment's root domain name. the Some of the stacks "
@@ -206,7 +212,7 @@ class SetupWizard(Command):
             if re.match(r"^[a-z,0-9,.,\-,_]+$", full_domain_name):
                 break
 
-        get_command("configure_deployment_domain").execute(
+        ConfigureDeploymentDomain.execute(
             deployment_id=deployment_id, full_domain_name=full_domain_name
         )
 
@@ -215,25 +221,32 @@ class SetupWizard(Command):
         # -------------------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + NEUTRAL
             + "For next a generic HTTPS certificate is created that can serve "
             + f"HTTPS requests from https://{full_domain_name} and https://*.{full_domain_name} \n"
             + "This certificate will automatically be assigend to the frontends you "
             + "deploy and to the HTTP api: https://api.{full_domain_name}\n\n"
         )
 
-        get_command("create_deployment_certificate").execute(
+        CreateDeploymentCertificate.execute(
             deployment_id=deployment_id,
         )
 
-        print(GREEN + "Next: deploying the foundational stacks to AWS.\n\n" + NEUTRAL)
+        print(
+            "\n\n"
+            + GREEN
+            + "Next: deploying the foundational stacks to AWS.\n\n"
+            + NEUTRAL
+        )
 
         # ----------
         # deploy vpc
         # ----------
 
         print(
-            BLUE
+            "\n\n"
+            + BLUE
             + "Virtual Private Cloud\n"
             + NEUTRAL
             + "\tDeploying: a VPC with private and public subnets in multi availability-zone "
@@ -241,7 +254,7 @@ class SetupWizard(Command):
             + "security groups that will control internal and external network communication.\n\n"
         )
 
-        get_command("deploy_vpc").execute(
+        DeployVpc.execute(
             deployment_id=deployment_id,
         )
 
@@ -250,7 +263,8 @@ class SetupWizard(Command):
         # -----------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + NEUTRAL
             + "An API Gateway is going to be deployed, that can be used to host HTTP endpoints to "
             + "any backend services that we add later.\n\n"
             + BLUE
@@ -270,23 +284,8 @@ class SetupWizard(Command):
         # -----------
 
         print(
-            BLUE
-            + "Authentication\n\n"
-            + NEUTRAL
-            + "\tDeploying: a Cognito Identity Pool that can be used for IAM based authorization "
-            + "with the API Gateway, and a Cognito User Pool as well, to store and manage user ceredentials.\n\n"
-        )
-
-        DeployAuthUserPool.execute(
-            deployment_id=deployment_id,
-        )
-
-        # -----------
-        # deploy auth
-        # -----------
-
-        print(
-            BLUE
+            "\n\n"
+            + BLUE
             + "Authentication\n\n"
             + NEUTRAL
             + "\tDeploying: a Cognito Identity Pool that can be used for IAM based authorization "
@@ -302,7 +301,8 @@ class SetupWizard(Command):
         # -------------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + NEUTRAL
             + "The services that are going to be deployed can trigger different alarms "
             + "in case they run out of CPU or memory resources, on execution issues and "
             + "other warnings. We are creating an SNS topic that these alarm notifications "
@@ -329,7 +329,8 @@ class SetupWizard(Command):
         # ------
 
         print(
-            NEUTRAL
+            "\n\n"
+            + NEUTRAL
             + "Your backend and frontend services will be deployed by CICD pipelines provided "
             + "by Waffle. In order for these pipelines to be able to fetch your srouces on changes "
             + "from your repositories hosted on GitHub, you have to provide an API key "
@@ -342,10 +343,18 @@ class SetupWizard(Command):
             + "\tDeploying: a Secret Manager secret storing the GitHub API key.\n\n"
         )
 
-        DeployGithub.execute(deployment_id=deployment_id)
+        DeployGithub.execute(deployment_id=deployment_id, wait_to_finish=True)
 
         github_access_token: str = ""
         while True:
             github_access_token = input("GitHub access token: ")
             if github_access_token != "":
                 break
+
+        # TODO: store the github_access_token in secret
+
+        gateways.stacks.wait_for_stacks_to_create_or_update(
+            deployment_id=deployment_id, aws_region=aws_region
+        )
+
+        print("\n\n" + GREEN + "Next: deploying service stacks to AWS.\n\n" + NEUTRAL)

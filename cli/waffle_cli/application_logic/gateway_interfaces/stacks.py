@@ -12,3 +12,10 @@ class Stacks(Protocol):
         stack_state: CfnStackState | None,
         parameters: list[dict[str, str]],
     ) -> str: ...
+
+    def wait_for_stacks_to_create_or_update(
+        self,
+        deployment_id: str,
+        aws_region: str,
+        cfn_stack_ids: list[str] | None = None,
+    ) -> bool: ...

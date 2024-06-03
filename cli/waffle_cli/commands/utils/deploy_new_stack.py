@@ -1,8 +1,8 @@
 from typing import Callable
-from application_logic.entities.cfn_stack_state import CfnStackState
-from application_logic.entities.deployment_setting import DeploymentSetting
-from application_logic.entities.project_setting import ProjectSetting
-from application_logic.entities.project_stack_setting import ProjectStackSetting
+from ...application_logic.entities.cfn_stack_state import CfnStackState
+from ...application_logic.entities.deployment_setting import DeploymentSetting
+from ...application_logic.entities.project_setting import ProjectSetting
+from ...application_logic.entities.project_stack_setting import ProjectStackSetting
 from ...application_logic.gateway_interfaces import Gateways
 from ...gateways import gateway_implementations
 from ...utils.std_colors import NEUTRAL, RED, YELLOW
