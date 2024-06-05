@@ -20,7 +20,7 @@ class GithubSecret:
                     "",
                     [Ref(p.deployment_id), "-github"],
                 ),
-                SecretString='{"token":""}',
+                SecretString='{"github_access_token":""}',
             )
         )
 

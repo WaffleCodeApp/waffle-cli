@@ -19,3 +19,11 @@ class Stacks(Protocol):
         aws_region: str,
         cfn_stack_ids: list[str] | None = None,
     ) -> bool: ...
+
+    def get_physical_resource_id_from_stack(
+        self,
+        deployment_id: str,
+        aws_region: str,
+        cfn_stack_id: str,
+        logical_resource_id: str,
+    ) -> str: ...

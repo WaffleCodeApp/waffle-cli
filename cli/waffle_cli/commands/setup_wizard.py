@@ -233,6 +233,10 @@ class SetupWizard(Command):
             deployment_id=deployment_id,
         )
 
+        # -------------------------
+        # deploying the foundations
+        # -------------------------
+
         print(
             "\n\n"
             + GREEN
@@ -343,15 +347,15 @@ class SetupWizard(Command):
             + "\tDeploying: a Secret Manager secret storing the GitHub API key.\n\n"
         )
 
-        DeployGithub.execute(deployment_id=deployment_id, wait_to_finish=True)
-
         github_access_token: str = ""
         while True:
             github_access_token = input("GitHub access token: ")
             if github_access_token != "":
                 break
 
-        # TODO: store the github_access_token in secret
+        DeployGithub.execute(
+            deployment_id=deployment_id, access_token=github_access_token
+        )
 
         gateways.stacks.wait_for_stacks_to_create_or_update(
             deployment_id=deployment_id, aws_region=aws_region

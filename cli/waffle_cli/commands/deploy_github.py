@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 from typing import Any
 
+from application_logic.entities.cfn_stack_state import CfnStackState
+
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..templates.github import (
@@ -31,15 +33,17 @@ class DeployGithub(Command):
             help="An existing deployment ID that you add local credentials for",
             choices=gateways.deployment_settings.get_names(),
         )
+        parser.add_argument("access_token", help="GitHub access token", default="")
 
     @staticmethod
     def execute(
         deployment_id: str | None = None,
-        wait_to_finish: bool = False,
+        access_token: str | None = None,
         gateways: Gateways = gateway_implementations,
         **_: Any,
     ) -> None:
         assert deployment_id is not None
+        assert access_token is not None
 
         deploy_new_stack(
             deployment_id=deployment_id,
@@ -51,11 +55,41 @@ class DeployGithub(Command):
             ),
         )
 
-        if wait_to_finish:
-            deployment_setting = gateways.deployment_settings.get(deployment_id)
-            assert deployment_setting is not None
-            assert deployment_setting.aws_region is not None
+        deployment_setting = gateways.deployment_settings.get(deployment_id)
+        assert deployment_setting is not None
+        assert deployment_setting.aws_region is not None
 
-            gateways.stacks.wait_for_stacks_to_create_or_update(
-                deployment_id, deployment_setting.aws_region, [STACK_ID]
+        gateways.stacks.wait_for_stacks_to_create_or_update(
+            deployment_id, deployment_setting.aws_region, [STACK_ID]
+        )
+
+        deployment_stack: CfnStackState | None = next(
+            (
+                stack
+                for stack in deployment_setting.stacks
+                if stack.stack_id == STACK_ID
+            ),
+            None,
+        )
+
+        assert deployment_stack is not None
+
+        secret_physical_resource_id = (
+            gateways.stacks.get_physical_resource_id_from_stack(
+                deployment_id=deployment_id,
+                aws_region=deployment_setting.aws_region,
+                cfn_stack_id=deployment_stack.cfn_stack_id,
+                logical_resource_id="GithubSecret",
             )
+        )
+        secret_arn = gateways.github_secrets.get_secret_arn_from_physical_resource_id(
+            deployment_id=deployment_id,
+            aws_region=deployment_setting.aws_region,
+            physical_resource_id=secret_physical_resource_id,
+        )
+        gateways.github_secrets.store_access_token(
+            deployment_id=deployment_id,
+            aws_region=deployment_setting.aws_region,
+            secret_arn=secret_arn,
+            access_token=access_token,
+        )

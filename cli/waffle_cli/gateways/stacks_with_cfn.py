@@ -130,3 +130,17 @@ class StacksWithCfn(Stacks):
             sleep(10)
         show_progress(i, "Finished creating or updating stacks...")
         return succeeded
+
+    def get_physical_resource_id_from_stack(
+        self,
+        deployment_id: str,
+        aws_region: str,
+        cfn_stack_id: str,
+        logical_resource_id: str,
+    ) -> str:
+        client = self._get_client(deployment_id, aws_region)
+        response = client.describe_stack_resource(
+            StackName=cfn_stack_id, LogicalResourceId=logical_resource_id
+        )
+        physical_resource_id = response["StackResources"][0]["PhysicalResourceId"]
+        return physical_resource_id
