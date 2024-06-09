@@ -1,5 +1,6 @@
 from .command_type import Command
-from .setup_wizard import SetupWizard
+from .create_deployment_wizard import CreateDeploymentWizard
+from .create_services_wizard import CreateServicesWizard
 from .create_deployment_settings import CreateDeploymentSettings
 from .list_deployments import ListDeployments
 from .configure_aws_profile import ConfigureAwsProfile
@@ -13,7 +14,8 @@ from .deploy_github import DeployGithub
 from .deploy_deployment import DeployDeployment
 
 COMMANDS: list[Command] = [
-    SetupWizard(),
+    CreateDeploymentWizard(),
+    CreateServicesWizard(),
     CreateDeploymentSettings(),
     ListDeployments(),
     ConfigureAwsProfile(),

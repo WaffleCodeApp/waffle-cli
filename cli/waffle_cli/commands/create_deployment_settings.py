@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 from typing import Any
+
 from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..utils.std_colors import NEUTRAL, RED
@@ -40,3 +42,7 @@ class CreateDeploymentSettings(Command):
         gateways.deployment_settings.create_or_update(
             DeploymentSetting(deployment_id=deployment_id)
         )
+        deployment_state: DeploymentState = gateways.deployment_states.get(
+            deployment_id
+        ) or DeploymentState(deployment_id=deployment_id)
+        gateways.deployment_states.create_or_update(deployment_state)

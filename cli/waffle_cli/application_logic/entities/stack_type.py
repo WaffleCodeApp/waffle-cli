@@ -12,3 +12,4 @@ class StackType(str, Enum):
     cdn_cicd = "cdn_cicd"
     cfn_cicd = "cfn_cicd"
     ecs_cicd = "ecs_cicd"
+    custom = "custom"

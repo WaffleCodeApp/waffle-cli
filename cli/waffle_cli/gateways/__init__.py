@@ -2,6 +2,7 @@ from ..application_logic.gateway_interfaces import Gateways
 from ..application_logic.gateway_interfaces.deployment_settings import (
     DeploymentSettings,
 )
+from ..application_logic.gateway_interfaces.deployment_states import DeploymentStates
 from ..application_logic.gateway_interfaces.project_settings import (
     ProjectSettings,
 )
@@ -13,6 +14,7 @@ from ..application_logic.gateway_interfaces.deployment_template_bucket import (
 from ..application_logic.gateway_interfaces.stacks import Stacks
 from ..application_logic.gateway_interfaces.github_secrets import GitHubSecrets
 from .deployment_settings_with_json import DeploymentSettingsWithJson
+from .deployment_states_with_json import DeploymentStatesWithJson
 from .project_settings_with_json import ProjectSettingsWithJson
 from .hosted_zones_with_r53 import HostedZonesWithRoute53
 from .certs_with_cm import CertsWithCertManager
@@ -22,6 +24,7 @@ from .stacks_with_cfn import StacksWithCfn
 
 class _GatewayImplementations(Gateways):
     deployment_settings: DeploymentSettings
+    deployment_states: DeploymentStates
     project_settings: ProjectSettings
     hosted_zones: HostedZones
     certs: Certs
@@ -31,6 +34,7 @@ class _GatewayImplementations(Gateways):
 
     def __init__(self) -> None:
         self.deployment_settings = DeploymentSettingsWithJson()
+        self.deployment_states = DeploymentStatesWithJson()
         self.project_settings = ProjectSettingsWithJson()
         self.hosted_zones = HostedZonesWithRoute53()
         self.certs = CertsWithCertManager()

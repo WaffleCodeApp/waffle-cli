@@ -1,8 +1,9 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from application_logic.entities.cfn_stack_state import CfnStackState
-
+from ..application_logic.entities.cfn_stack_state import CfnStackState
+from ..application_logic.entities.deployment_state import DeploymentState
+from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..templates.github import (
@@ -48,11 +49,13 @@ class DeployGithub(Command):
         deploy_new_stack(
             deployment_id=deployment_id,
             stack_id=STACK_ID,
-            template_name_default=TEMPLATE_NAME,
+            template_name=TEMPLATE_NAME,
             generate_stack_json=generate_github_stack_json,
             parameter_list=generate_github_parameter_list(
                 deployment_id=deployment_id,
             ),
+            stack_type=StackType.github,
+            include_in_the_project=False,
         )
 
         deployment_setting = gateways.deployment_settings.get(deployment_id)
@@ -63,12 +66,12 @@ class DeployGithub(Command):
             deployment_id, deployment_setting.aws_region, [STACK_ID]
         )
 
+        deployment_state: DeploymentState = gateways.deployment_states.get(
+            deployment_id
+        ) or DeploymentState(deployment_id=deployment_id)
+
         deployment_stack: CfnStackState | None = next(
-            (
-                stack
-                for stack in deployment_setting.stacks
-                if stack.stack_id == STACK_ID
-            ),
+            (stack for stack in deployment_state.stacks if stack.stack_id == STACK_ID),
             None,
         )
 

@@ -1,7 +1,9 @@
 from argparse import ArgumentParser
 from typing import Any
 import uuid
+
 from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..utils.std_colors import BLUE, BOLD, NEUTRAL, RED
@@ -36,10 +38,10 @@ class ConfigureDeploymentDomain(Command):
         assert deployment_id is not None
         assert full_domain_name is not None
 
-        setting: DeploymentSetting | None = gateways.deployment_settings.get(
+        deployment_setting: DeploymentSetting | None = gateways.deployment_settings.get(
             deployment_id
         )
-        if setting is None:
+        if deployment_setting is None:
             print(
                 RED
                 + f"Settings for {deployment_id} not found. Please make sure to run create_deployment_settings first."
@@ -47,34 +49,22 @@ class ConfigureDeploymentDomain(Command):
             )
             raise Exception("Setting not found for deployment_id")
 
-        if setting.full_domain_name == full_domain_name and setting.ns_list is not None:
-            print(
-                RED
-                + "Settings found for the specified domain name, which indicates that configure_deployment_domain has already been run."
-                + NEUTRAL
-            )
-            raise Exception("Domain is already set up")
+        deployment_state: DeploymentState = gateways.deployment_states.get(
+            deployment_id
+        ) or DeploymentState(deployment_id=deployment_id)
 
-        if (
-            setting.full_domain_name is not None
-            and setting.full_domain_name != full_domain_name
-            and setting.ns_list is not None
-        ):
-            print(RED + "Settings found for a different domain name." + NEUTRAL)
-            raise Exception("Domain is already set up")
-
-        ns_list = gateways.hosted_zones.create_hosted_zone_and_get_ns_list(
+        ns_list = gateways.hosted_zones.create_or_get_hosted_zone_and_get_ns_list(
             deployment_id=deployment_id, full_domain_name=full_domain_name
         )
 
-        setting.full_domain_name = full_domain_name
-        setting.ns_list = ns_list
+        deployment_setting.full_domain_name = full_domain_name
 
-        setting.template_bucket_name = f"""{full_domain_name.replace(".","-")}-{str(
+        deployment_state.template_bucket_name = f"""{full_domain_name.replace(".","-")}-{str(
             uuid.uuid3(uuid.NAMESPACE_DNS, full_domain_name)
         )}"""
 
-        gateways.deployment_settings.create_or_update(setting)
+        gateways.deployment_settings.create_or_update(deployment_setting)
+        gateways.deployment_states.create_or_update(deployment_state)
 
         root_domain = ".".join(full_domain_name.split(".")[1:])
 

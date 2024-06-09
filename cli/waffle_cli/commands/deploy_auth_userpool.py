@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from typing import Any
 
-
+from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..templates.authentication import (
@@ -35,10 +35,15 @@ class DeployAuthUserPool(Command):
             help="An existing deployment ID that you add local credentials for",
             choices=gateways.deployment_settings.get_names(),
         )
+        parser.add_argument(
+            "--custom_template_name",
+            help="Optional. If there is a custom, already uploaded template for this purpose, specify its name.",
+        )
 
     @staticmethod
     def execute(
         deployment_id: str | None = None,
+        custom_template_name: str | None = None,
         gateways: Gateways = gateway_implementations,
         **_: Any,
     ) -> None:
@@ -47,10 +52,12 @@ class DeployAuthUserPool(Command):
         deploy_new_stack(
             deployment_id=deployment_id,
             stack_id=STACK_ID,
-            template_name_default=TEMPLATE_NAME,
+            template_name=custom_template_name or TEMPLATE_NAME,
             generate_stack_json=generate_auth_stack_json,
             parameter_list=generate_auth_parameter_list(
                 deployment_id=deployment_id,
                 create_userpool="True",
             ),
+            stack_type=StackType.auth,
+            include_in_the_project=False,
         )

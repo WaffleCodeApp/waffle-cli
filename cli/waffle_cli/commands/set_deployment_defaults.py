@@ -40,27 +40,33 @@ class SetDeploymentDefaults(Command):
                 "us-west-1",
                 "us-west-2",
             ],
-            required=True
+            required=True,
         )
         parser.add_argument(
             "--default_log_retention_days",
             help="Log retention to setting to be used by the stacks and components that are deployed with waffle. Default: 365",
             required=False,
             type=int,
-            choices=[0, 7, 365]
+            choices=[0, 7, 365],
         )
         parser.add_argument(
             "--default_alarms_enabled",
             help="Shall the stacks and components that are deployed with waffle trigger CloudWatch alarms? Default: True",
             required=False,
-            choices=['True', 'False']
+            choices=["True", "False"],
         )
         parser.add_argument(
             "--default_db_backup_retention",
             help="Backup retention to setting to be used by databases that are deployed with waffle. Default: 35",
             required=False,
             type=int,
-            choices=[0, 7, 35]
+            choices=[0, 7, 35],
+        )
+        parser.add_argument(
+            "--default_require_manual_cicd_approval",
+            help="Shall the CICD pipelines include an approval step before deployment? Default: True",
+            required=False,
+            choices=["True", "False"],
         )
 
     @staticmethod
@@ -70,6 +76,7 @@ class SetDeploymentDefaults(Command):
         default_log_retention_days: int | None = None,
         default_alarms_enabled: str | None = None,
         default_db_backup_retention: int | None = None,
+        default_require_manual_cicd_approval: str | None = None,
         gateways: Gateways = gateway_implementations,
         **__: Any
     ) -> None:
@@ -79,11 +86,7 @@ class SetDeploymentDefaults(Command):
             deployment_id
         )
         if setting is None:
-            print(
-                RED
-                + "Settings not found for this deployment_id."
-                + NEUTRAL
-            )
+            print(RED + "Settings not found for this deployment_id." + NEUTRAL)
             raise Exception("deployment_id not found")
 
         setting.aws_region = aws_region
@@ -92,9 +95,14 @@ class SetDeploymentDefaults(Command):
             setting.default_log_retention_days = default_log_retention_days
 
         if default_alarms_enabled is not None:
-            setting.default_alarms_enabled = default_alarms_enabled == 'True'
+            setting.default_alarms_enabled = default_alarms_enabled == "True"
 
         if default_db_backup_retention is not None:
             setting.default_db_backup_retention = default_db_backup_retention
+
+        if default_require_manual_cicd_approval is not None:
+            setting.default_require_manual_cicd_approval = (
+                default_require_manual_cicd_approval == "True"
+            )
 
         gateways.deployment_settings.create_or_update(setting)

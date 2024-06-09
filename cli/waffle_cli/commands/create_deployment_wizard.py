@@ -18,8 +18,8 @@ from .deploy_github import DeployGithub
 from .set_deployment_defaults import SetDeploymentDefaults
 
 
-class SetupWizard(Command):
-    name = "setup_wizard"
+class CreateDeploymentWizard(Command):
+    name = "create_deployment_wizard"
     description = "Step-by-step create a deployment."
 
     @staticmethod
@@ -40,7 +40,7 @@ class SetupWizard(Command):
         )
         while True:
             proceed = input("Do you want to proceed? [Y]/n ")
-            if proceed.lower() == "y":
+            if proceed.lower() == "y" or proceed == "":
                 break
             elif proceed.lower() == "n":
                 return
@@ -147,6 +147,22 @@ class SetupWizard(Command):
                 break
             print(RED + "Please choose from 0, 7 or 35." + NEUTRAL)
 
+        default_require_manual_cicd_approval: str = ""
+        while True:
+            default_require_manual_cicd_approval = input(
+                "CICD pipelines require manual approval before deployment by default: [yes or no] "
+            )
+            if default_require_manual_cicd_approval.lower() in [
+                "y",
+                "yes",
+                "n",
+                "no",
+                "true",
+                "false",
+            ]:
+                break
+            print(RED + "Please respond with yes or no." + NEUTRAL)
+
         SetDeploymentDefaults.execute(
             deployment_id=deployment_id,
             default_log_retention_days=int(default_log_retention_days),
@@ -154,6 +170,11 @@ class SetupWizard(Command):
                 "True" if default_alarms_enabled in ["y", "yes", "true"] else "False"
             ),
             default_db_backup_retention=int(default_db_backup_retention),
+            default_require_manual_cicd_approval=(
+                "True"
+                if default_require_manual_cicd_approval in ["y", "yes", "true"]
+                else "False"
+            ),
         )
 
         # -----------
@@ -357,8 +378,15 @@ class SetupWizard(Command):
             deployment_id=deployment_id, access_token=github_access_token
         )
 
+        print(NEUTRAL + "\n\n")
+
         gateways.stacks.wait_for_stacks_to_create_or_update(
             deployment_id=deployment_id, aws_region=aws_region
         )
 
-        print("\n\n" + GREEN + "Next: deploying service stacks to AWS.\n\n" + NEUTRAL)
+        print(
+            "\n\n"
+            + GREEN
+            + "Next: Proceed with adding services to your project.\n\n"
+            + NEUTRAL
+        )

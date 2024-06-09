@@ -193,7 +193,6 @@ class CicdRoles:
                                         "cloudformation:*",
                                         "rds:*",
                                         "sqs:*",
-                                        "iam:PassRole",
                                     ],
                                     "Resource": "*",
                                 },

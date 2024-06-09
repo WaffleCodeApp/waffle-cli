@@ -1,10 +1,11 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from .utils.deploy_new_stack import deploy_new_stack
+from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..templates.vpc import generate_vpc_parameter_list, generate_vpc_stack_json
+from .utils.deploy_new_stack import deploy_new_stack
 from .command_type import Command
 
 
@@ -56,6 +57,10 @@ class DeployVpc(Command):
             help="The CIDR of the secondary public subnet. (like for example: 10.51.144.0/20)",
             default="10.51.144.0/20",
         )
+        parser.add_argument(
+            "--custom_template_name",
+            help="Optional. If there is a custom, already uploaded template for this purpose, specify its name.",
+        )
 
     @staticmethod
     def execute(
@@ -65,6 +70,7 @@ class DeployVpc(Command):
         secondary_private_cidr: str | None = None,
         primary_public_cidr: str | None = None,
         secondary_public_cidr: str | None = None,
+        custom_template_name: str | None = None,
         gateways: Gateways = gateway_implementations,
         **_: Any,
     ) -> None:
@@ -78,7 +84,7 @@ class DeployVpc(Command):
         deploy_new_stack(
             deployment_id=deployment_id,
             stack_id=STACK_ID,
-            template_name_default=TEMPLATE_NAME,
+            template_name=custom_template_name or TEMPLATE_NAME,
             generate_stack_json=generate_vpc_stack_json,
             parameter_list=generate_vpc_parameter_list(
                 deployment_id=deployment_id,
@@ -88,4 +94,6 @@ class DeployVpc(Command):
                 primary_public_cidr=primary_public_cidr,
                 secondary_public_cidr=secondary_public_cidr,
             ),
+            stack_type=StackType.vpc,
+            include_in_the_project=False,
         )

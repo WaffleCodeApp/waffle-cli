@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from typing import Any
 
+from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..templates.deployment import (
@@ -43,9 +44,11 @@ class DeployDeployment(Command):
         deploy_new_stack(
             deployment_id=deployment_id,
             stack_id=STACK_ID,
-            template_name_default=TEMPLATE_NAME,
+            template_name=TEMPLATE_NAME,
             generate_stack_json=generate_deployment_stack_json,
             parameter_list=generate_deployment_parameter_list(
                 deployment_id=deployment_id,
             ),
+            stack_type=StackType.deployment,
+            include_in_the_project=False,
         )
