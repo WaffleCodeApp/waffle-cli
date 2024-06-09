@@ -1,5 +1,8 @@
 from argparse import ArgumentParser
+import re
 from typing import Any
+
+from commands.deploy_db import DeployDb
 
 from ..application_logic.entities.project_setting import ProjectSetting
 from ..application_logic.gateway_interfaces import Gateways
@@ -55,7 +58,7 @@ class CreateServicesWizard(Command):
             + "You can create the following types of services with waffle:\n"
             + "- Frontend with its own CICD pipeline\n"
             + "- Long running (containerized) backend service with its own CICD pipeline and HTTP endpoints\n"
-            + "- Database with optional automated backups\n"
+            + "- Database with optional automated backups. Only PostgreSQL is supported yet.\n"
             + "- Any infrastructure as code with its own CICD pipeline\n"
             + "The last one can be used for deploying short-running, rapidly scaling backend services (AWS Lambda).\n\n"
             + NEUTRAL
@@ -84,7 +87,7 @@ class CreateServicesWizard(Command):
                 + NEUTRAL
                 + "[0] Frontend\n"
                 + "[1] Backend container\n"
-                + "[2] Database\n"
+                + "[2] Database (PostgreSQL)\n"
                 + "[3] Infrastructure (choose this for deploying Lambda)\n"
                 + "[4] I've finished adding services.\n\n"
             )
@@ -131,7 +134,32 @@ class CreateServicesWizard(Command):
                             + NEUTRAL
                         )
                     elif resp == "2":
-                        print(BOLD + "Adding and deploying a database\n\n" + NEUTRAL)
+                        print(
+                            BOLD
+                            + "Adding and deploying a database\n\n"
+                            + NEUTRAL
+                            + "Databases created using waffle require an identifier. "
+                            + "This id can be used for easily accessing the db from "
+                            + "other services. The id can be a string of your choice "
+                            + "containing only letters. You'll likely have to use the id in "
+                            + "your codebase, so it's recommended to use something that "
+                            + "explains the purpose well, like for example 'engine' or 'customers'."
+                            + "\n\n"
+                        )
+                        while True:
+                            database_id = input(
+                                "Please choose a deployment from the list above or type done: "
+                            )
+                            if database_id != "" and re.match(
+                                "^[a-z,0-9]+$", database_id
+                            ):
+                                break
+                            print(
+                                RED
+                                + "Only letters and numbers are supported."
+                                + NEUTRAL
+                            )
+                        DeployDb.execute(deployment_id=deployment_id)
                     elif resp == "3":
                         print(
                             BOLD
