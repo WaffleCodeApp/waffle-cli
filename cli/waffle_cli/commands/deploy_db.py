@@ -36,7 +36,7 @@ class DeployDb(Command):
             "database_id",
             help="A database ID that will represent the database. Backend components will be able "
             "to access the database using this id. Recommended to use a human-understanable name "
-            "that explains the purpose, like for example engine or customers.",
+            "that explains the purpose, like for example 'engine' or 'customers'.",
         )
         parser.add_argument(
             "--allocated_storage_size",

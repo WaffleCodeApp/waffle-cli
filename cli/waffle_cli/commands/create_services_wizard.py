@@ -2,13 +2,13 @@ from argparse import ArgumentParser
 import re
 from typing import Any
 
-from commands.deploy_db import DeployDb
-
 from ..application_logic.entities.project_setting import ProjectSetting
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
 from ..utils.std_colors import BLUE, BOLD, NEUTRAL, RED, YELLOW
 from .command_type import Command
+from .deploy_cdn import DeployCdn
+from .deploy_db import DeployDb
 
 
 class CreateServicesWizard(Command):
@@ -120,12 +120,17 @@ class CreateServicesWizard(Command):
 
                     print("\n\n")
                     # proceed with deployment
-                    # for first deployment ask all non-optional questions
-                    # for 2nd+ deployments take the 1st answers as defaults
 
                     if resp == "0":
                         print(
                             BOLD + "Adding and deploying a frontend-stack\n\n" + NEUTRAL
+                        )
+                        pipeline_id = input("Please choose an id for this service: ")
+                        if pipeline_id != "" and re.match("^[a-z,0-9]+$", pipeline_id):
+                            break
+                        print(RED + "Only letters and numbers are supported." + NEUTRAL)
+                        DeployCdn.execute(
+                            deployment_id=deployment_id, pipeline_id=pipeline_id
                         )
                     elif resp == "1":
                         print(
@@ -148,7 +153,7 @@ class CreateServicesWizard(Command):
                         )
                         while True:
                             database_id = input(
-                                "Please choose a deployment from the list above or type done: "
+                                "Please choose an id for this database: "
                             )
                             if database_id != "" and re.match(
                                 "^[a-z,0-9]+$", database_id
@@ -159,7 +164,9 @@ class CreateServicesWizard(Command):
                                 + "Only letters and numbers are supported."
                                 + NEUTRAL
                             )
-                        DeployDb.execute(deployment_id=deployment_id)
+                        DeployDb.execute(
+                            deployment_id=deployment_id, database_id=database_id
+                        )
                     elif resp == "3":
                         print(
                             BOLD

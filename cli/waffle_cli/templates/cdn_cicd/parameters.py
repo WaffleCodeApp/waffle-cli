@@ -1,5 +1,4 @@
 from troposphere import Parameter, Template  # pyright: ignore[reportMissingTypeStubs]
-from application_logic.entities.deployment_type import DeploymentType
 
 
 class Parameters:
@@ -32,20 +31,6 @@ class Parameters:
             Parameter("DeploymentId", Description="deployment_id", Type="String")
         )
 
-        self.deployment_type = t.add_parameter(
-            Parameter(
-                "DeploymentType",
-                Description="[ %s ]"
-                % " | ".join(
-                    [
-                        DeploymentType.DEV.value,
-                        DeploymentType.PROD.value,
-                    ]
-                ),
-                Type="String",
-            )
-        )
-
         self.pipeline_id = t.add_parameter(
             Parameter("PipelineId", Description="pipeline_id", Type="String")
         )
@@ -71,7 +56,7 @@ class Parameters:
         self.web_subdomain = t.add_parameter(
             Parameter(
                 "WebHostname",
-                Description="www from www.dev.wafflecode.app",
+                Description="Like the 'www' from 'www.dev.wafflecode.app'.",
                 Type="String",
                 Default="www",
             )
