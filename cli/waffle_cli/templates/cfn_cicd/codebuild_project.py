@@ -73,7 +73,7 @@ class CodebuildProject:
                             Name="SERVICE_SECRET_ARN", Value=Ref(s.secret)
                         ),
                         codebuild.EnvironmentVariable(
-                            Name="BUILD_ENV_VARS_JSON", Value="{}"
+                            Name="BUILD_ENV_VARS_JSON", Value=Ref(p.build_env_vars_json)
                         ),
                         codebuild.EnvironmentVariable(
                             Name="JSON",

@@ -42,8 +42,8 @@ def generate_cdn_cicd_parameter_list(
     github_owner: str,
     github_repo_name: str,
     github_branch: str,
-    commit_id: str | None,
     buildspec_path: str,
+    commit_id: str | None = None,
     github_secret_arn: str | None = None,
     api_protocol: str | None = None,
     api_host: str | None = None,
@@ -91,10 +91,6 @@ def generate_cdn_cicd_parameter_list(
             "ParameterValue": github_owner,
         },
         {
-            "ParameterKey": "GithubSecretArn",
-            "ParameterValue": github_secret_arn or "",
-        },
-        {
             "ParameterKey": "GithubRepoName",
             "ParameterValue": github_repo_name,
         },
@@ -109,6 +105,10 @@ def generate_cdn_cicd_parameter_list(
         {
             "ParameterKey": "BuildspecPath",
             "ParameterValue": buildspec_path,
+        },
+        {
+            "ParameterKey": "GithubSecretArn",
+            "ParameterValue": github_secret_arn or "",
         },
         {
             "ParameterKey": "ApiProtocol",

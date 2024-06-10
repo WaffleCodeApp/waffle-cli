@@ -1,5 +1,4 @@
 from troposphere import Parameter, Template  # pyright: ignore[reportMissingTypeStubs]
-from application_logic.entities.deployment_type import DeploymentType
 
 
 class Parameters:
@@ -32,23 +31,11 @@ class Parameters:
     deployment_secret_arn: Parameter
     github_secret_arn: Parameter
 
+    build_env_vars_json: Parameter
+
     def __init__(self, t: Template):
         self.deployment_id = t.add_parameter(
             Parameter("DeploymentId", Description="deployment_id", Type="String")
-        )
-
-        self.deployment_type = t.add_parameter(
-            Parameter(
-                "DeploymentType",
-                Description="[ %s ]"
-                % " | ".join(
-                    [
-                        DeploymentType.DEV.value,
-                        DeploymentType.PROD.value,
-                    ]
-                ),
-                Type="String",
-            )
         )
 
         self.pipeline_id = t.add_parameter(
@@ -259,5 +246,14 @@ class Parameters:
                 Description="(optional) The arn of the github_secret",
                 Type="String",
                 Default="",
+            )
+        )
+
+        self.build_env_vars_json = t.add_parameter(
+            Parameter(
+                "BuildEnvVarsJson",
+                Description="(optional) A JSON that will be used as env var during build. ",
+                Type="String",
+                Default="{}",
             )
         )
