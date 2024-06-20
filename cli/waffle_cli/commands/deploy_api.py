@@ -1,9 +1,9 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from application_logic.entities.deployment_state import DeploymentState
 
 from ..application_logic.entities.deployment_setting import DeploymentSetting
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations

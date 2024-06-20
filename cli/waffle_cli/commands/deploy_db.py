@@ -69,6 +69,15 @@ class DeployDb(Command):
             help="AWS DB snapshot identifier. If the database has to be restored from a backup, specify this identifies the backup.",
         )
         parser.add_argument(
+            "--multi_az",
+            help="If there shall be instance replicas in different AWS availability zones.",
+        )
+        parser.add_argument(
+            "--log_retention_days",
+            help="How many days should logs be kept",
+        )
+
+        parser.add_argument(
             "--custom_template_name",
             help="Optional. If there is a custom, already uploaded template for this purpose, specify its name.",
         )

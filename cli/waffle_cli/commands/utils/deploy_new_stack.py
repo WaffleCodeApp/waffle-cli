@@ -3,8 +3,6 @@ from typing import Callable
 from ...application_logic.entities.cfn_stack_state import CfnStackState
 from ...application_logic.entities.deployment_setting import DeploymentSetting
 from ...application_logic.entities.deployment_state import DeploymentState
-from ...application_logic.entities.project_setting import ProjectSetting
-from ...application_logic.entities.project_stack_setting import ProjectStackSetting
 from ...application_logic.entities.stack_type import StackType
 from ...application_logic.gateway_interfaces import Gateways
 from ...gateways import gateway_implementations
@@ -51,27 +49,6 @@ def deploy_new_stack(
             + NEUTRAL
         )
         raise Exception("template_bucket_name is None")
-
-    if include_in_the_project:
-        project_setting = gateways.project_settings.get() or ProjectSetting()
-
-        project_stack: ProjectStackSetting | None = next(
-            (stack for stack in project_setting.stacks if stack.stack_id == stack_id),
-            None,
-        )
-        if project_stack:
-            # if stack_type == StackType.custom:
-            #     template_name = project_stack.template_name
-            pass
-        else:
-            project_setting.stacks.append(
-                ProjectStackSetting(
-                    stack_id=stack_id,
-                    template_name=template_name,
-                )
-            )
-
-        gateways.project_settings.create_or_update(project_setting)
 
     if stack_id in [stack.stack_id for stack in deployment_state.stacks]:
         print(

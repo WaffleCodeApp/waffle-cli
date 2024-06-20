@@ -54,6 +54,8 @@ def generate_cfn_cicd_parameter_list(
     alerts_sns_ref: str | None = None,
     deployment_secret_arn: str | None = None,
     build_env_vars_json: str | None = None,
+    log_retention_days: int = 365,
+    alarms_enabled: bool = True,
 ) -> list[dict[str, str]]:
     return [
         {
@@ -163,5 +165,13 @@ def generate_cfn_cicd_parameter_list(
         {
             "ParameterKey": "BuildEnvVarsJson",
             "ParameterValue": build_env_vars_json or "",
+        },
+        {
+            "ParameterKey": "LogRetentionDays",
+            "ParameterValue": f"{log_retention_days}",
+        },
+        {
+            "ParameterKey": "AlarmsEnabled",
+            "ParameterValue": "True" if alarms_enabled else "False",
         },
     ]

@@ -88,9 +88,6 @@ class Roles:
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        # TODO: only:
-                                        #  cognito-idp:AdminCreateUser
-                                        #  ...
                                         "cognito-idp:*",
                                     ],
                                     "Resource": If(

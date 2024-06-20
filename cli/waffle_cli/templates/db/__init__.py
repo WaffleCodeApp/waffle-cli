@@ -46,6 +46,7 @@ def generate_db_stack_json() -> str:
 
     return t.to_json()
 
+
 def generate_db_parameter_list(
     deployment_id: str,
     database_id: str,
@@ -56,6 +57,10 @@ def generate_db_parameter_list(
     instance_class: str | None = None,
     create_replica: str | None = None,
     snapshot_id: str | None = None,
+    multi_az: str | None = None,
+    log_retention_days: int = 365,
+    alarms_enabled: bool = True,
+    backup_retention: int = 35,
 ) -> list[dict[str, str]]:
     return [
         {
@@ -93,6 +98,21 @@ def generate_db_parameter_list(
         {
             "ParameterKey": "DBType",
             "ParameterValue": db_type or "",
-        }
+        },
+        {
+            "ParameterKey": "MultiAZ",
+            "ParameterValue": "True" if multi_az else "False",
+        },
+        {
+            "ParameterKey": "LogRetentionDays",
+            "ParameterValue": f"{log_retention_days}",
+        },
+        {
+            "ParameterKey": "AlarmsEnabled",
+            "ParameterValue": "True" if alarms_enabled else "False",
+        },
+        {
+            "ParameterKey": "BackupRetention",
+            "ParameterValue": f"{backup_retention}",
+        },
     ]
- 

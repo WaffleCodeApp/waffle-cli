@@ -52,6 +52,8 @@ def generate_cdn_cicd_parameter_list(
     auth_web_client: str | None = None,
     identity_pool_ref: str | None = None,
     build_env_vars_json: str | None = None,
+    log_retention_days: int = 365,
+    alarms_enabled: bool = True,
 ) -> list[dict[str, str]]:
     return [
         {
@@ -137,5 +139,13 @@ def generate_cdn_cicd_parameter_list(
         {
             "ParameterKey": "BuildEnvVarsJson",
             "ParameterValue": build_env_vars_json or "",
+        },
+        {
+            "ParameterKey": "LogRetentionDays",
+            "ParameterValue": f"{log_retention_days}",
+        },
+        {
+            "ParameterKey": "AlarmsEnabled",
+            "ParameterValue": "True" if alarms_enabled else "False",
         },
     ]
