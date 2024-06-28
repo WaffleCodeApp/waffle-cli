@@ -1,6 +1,5 @@
 from .command_type import Command
 from .create_deployment_wizard import CreateDeploymentWizard
-from .create_services_wizard import CreateServicesWizard
 from .create_deployment_settings import CreateDeploymentSettings
 from .list_deployments import ListDeployments
 from .configure_aws_profile import ConfigureAwsProfile
@@ -12,10 +11,10 @@ from .deploy_api import DeployApi
 from .deploy_alerts import DeployAlerts
 from .deploy_github import DeployGithub
 from .deploy_deployment import DeployDeployment
+from .generate_templates import GenerateTemplates
 
 COMMANDS: list[Command] = [
     CreateDeploymentWizard(),
-    CreateServicesWizard(),
     CreateDeploymentSettings(),
     ListDeployments(),
     ConfigureAwsProfile(),
@@ -27,6 +26,7 @@ COMMANDS: list[Command] = [
     DeployAlerts(),
     DeployGithub(),
     DeployDeployment(),
+    GenerateTemplates(),
 ]
 
 
