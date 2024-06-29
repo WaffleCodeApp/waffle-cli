@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.11-bullseye
+FROM mcr.microsoft.com/devcontainers/python:1-3.12-bullseye
 RUN pip install --upgrade pip
 
 # curl
