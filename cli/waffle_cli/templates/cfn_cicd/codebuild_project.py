@@ -250,18 +250,14 @@ class CodebuildProject:
                                     "UserPoolId": If(
                                         c.custom_user_pool_ref,
                                         Ref(p.user_pool_ref),
-                                        If(
-                                            c.create_userpool_selected,
-                                            ImportValue(
-                                                Join(
-                                                    "",
-                                                    [
-                                                        Ref(p.deployment_id),
-                                                        "-AuthUserPoolRef",
-                                                    ],
-                                                )
-                                            ),
-                                            "",
+                                        ImportValue(
+                                            Join(
+                                                "",
+                                                [
+                                                    Ref(p.deployment_id),
+                                                    "-AuthUserPoolRef",
+                                                ],
+                                            )
                                         ),
                                     ),
                                     "IdentityPoolId": If(

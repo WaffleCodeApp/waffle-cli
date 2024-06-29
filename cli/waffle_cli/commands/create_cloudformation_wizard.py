@@ -46,7 +46,7 @@ class CreateCloudFormationWizard(Command):
 
         print(
             BOLD
-            + "To which deployment do you want to install a frontend?\n\n"
+            + "To which deployment do you want to install a cloudformation stack?\n\n"
             + NEUTRAL
             + "The following deployments were found:\n"
             + "\n".join([f"\t- {d}" for d in deployment_ids])

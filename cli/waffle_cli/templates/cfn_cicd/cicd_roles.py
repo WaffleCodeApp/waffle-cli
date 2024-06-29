@@ -1,4 +1,5 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
+    GetAtt,
     Join,
     Ref,
     iam,
@@ -9,6 +10,7 @@ from awacs.sts import AssumeRole
 
 from .parameters import Parameters
 from .artifacts_bucket import ArtifactsBucket
+from .roles import Roles
 
 
 class CicdRoles:
@@ -17,7 +19,7 @@ class CicdRoles:
     deploy_cfn_role: iam.Role
     deploy_cfn_changeset_role: iam.Role
 
-    def __init__(self, t: Template, p: Parameters, ab: ArtifactsBucket):
+    def __init__(self, t: Template, p: Parameters, ab: ArtifactsBucket, r: Roles):
         self.codebuild_role = t.add_resource(
             iam.Role(
                 "CodeBuildServiceRole",
@@ -107,95 +109,6 @@ class CicdRoles:
             )
         )
 
-        self.codepipeline_role = t.add_resource(
-            iam.Role(
-                "CodePipelineServiceRole",
-                AssumeRolePolicyDocument=Policy(
-                    Statement=[
-                        Statement(
-                            Effect=Allow,
-                            Action=[AssumeRole],
-                            Principal=Principal(
-                                "Service", ["codepipeline.amazonaws.com"]
-                            ),
-                        )
-                    ]
-                ),
-                Path="/",
-                Policies=[
-                    iam.Policy(
-                        PolicyDocument={
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "s3:GetObject",
-                                        "s3:GetObjectVersion",
-                                        "s3:GetBucketVersioning*",
-                                        "s3:PutObject",
-                                    ],
-                                    "Resource": [
-                                        Join(
-                                            "",
-                                            [
-                                                "arn:aws:s3:::",
-                                                Ref(ab.artifacts_bucket),
-                                            ],
-                                        ),
-                                        Join(
-                                            "",
-                                            [
-                                                "arn:aws:s3:::",
-                                                Ref(ab.artifacts_bucket),
-                                                "/*",
-                                            ],
-                                        ),
-                                    ],
-                                },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "codebuild:StartBuild",
-                                        "codebuild:BatchGetBuilds",
-                                    ],
-                                    "Resource": "*",
-                                },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "cloudwatch:*",
-                                        "sns:*",
-                                        "cloudformation:*",
-                                        "rds:*",
-                                        "sqs:*",
-                                    ],
-                                    "Resource": "*",
-                                },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "lambda:InvokeFunction",
-                                        "lambda:ListFunctions",
-                                    ],
-                                    "Resource": "*",
-                                },
-                            ],
-                        },
-                        PolicyName=Join(
-                            "",
-                            [
-                                Ref(p.deployment_id),
-                                "-",
-                                Ref(p.pipeline_id),
-                                "-CodePipelineService",
-                            ],
-                        ),
-                    )
-                ],
-            )
-        )
-
         self.deploy_cfn_role = t.add_resource(
             iam.Role(
                 "DeployCfnRole",
@@ -244,6 +157,19 @@ class CicdRoles:
                                     # it has to be done by denying access by default
                                     # for the other existing trs.resources
                                     "Resource": "*",
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        # The CodePipelineServiceRole assumes
+                                        # the DeployCfnRole and DeployCfnChangeSetRole
+                                        # in order to be able to deploy. The following
+                                        # is required for that to work:
+                                        "iam:PassRole",
+                                    ],
+                                    "Resource": [
+                                        GetAtt(r.lambda_execution_role, "Arn"),
+                                    ],
                                 },
                                 {
                                     "Effect": "Allow",
@@ -350,6 +276,109 @@ class CicdRoles:
                 ),
                 ManagedPolicyArns=[
                     "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda"
+                ],
+            )
+        )
+
+        self.codepipeline_role = t.add_resource(
+            iam.Role(
+                "CodePipelineServiceRole",
+                AssumeRolePolicyDocument=Policy(
+                    Statement=[
+                        Statement(
+                            Effect=Allow,
+                            Action=[AssumeRole],
+                            Principal=Principal(
+                                "Service", ["codepipeline.amazonaws.com"]
+                            ),
+                        )
+                    ]
+                ),
+                Path="/",
+                Policies=[
+                    iam.Policy(
+                        PolicyDocument={
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectVersion",
+                                        "s3:GetBucketVersioning*",
+                                        "s3:PutObject",
+                                    ],
+                                    "Resource": [
+                                        Join(
+                                            "",
+                                            [
+                                                "arn:aws:s3:::",
+                                                Ref(ab.artifacts_bucket),
+                                            ],
+                                        ),
+                                        Join(
+                                            "",
+                                            [
+                                                "arn:aws:s3:::",
+                                                Ref(ab.artifacts_bucket),
+                                                "/*",
+                                            ],
+                                        ),
+                                    ],
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "codebuild:StartBuild",
+                                        "codebuild:BatchGetBuilds",
+                                    ],
+                                    "Resource": "*",
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudwatch:*",
+                                        "sns:*",
+                                        "cloudformation:*",
+                                        "rds:*",
+                                        "sqs:*",
+                                    ],
+                                    "Resource": "*",
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "lambda:InvokeFunction",
+                                        "lambda:ListFunctions",
+                                    ],
+                                    "Resource": "*",
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        # The CodePipelineServiceRole assumes
+                                        # the DeployCfnRole and DeployCfnChangeSetRole
+                                        # in order to be able to deploy. The following
+                                        # is required for that to work:
+                                        "iam:PassRole",
+                                    ],
+                                    "Resource": [
+                                        GetAtt(self.deploy_cfn_role, "Arn"),
+                                        GetAtt(self.deploy_cfn_changeset_role, "Arn"),
+                                    ],
+                                },
+                            ],
+                        },
+                        PolicyName=Join(
+                            "",
+                            [
+                                Ref(p.deployment_id),
+                                "-",
+                                Ref(p.pipeline_id),
+                                "-CodePipelineService",
+                            ],
+                        ),
+                    )
                 ],
             )
         )

@@ -1,7 +1,5 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
     Equals,
-    ImportValue,
-    Join,
     Not,
     Ref,
     Template,
@@ -11,7 +9,6 @@ from .parameters import Parameters
 
 class Conditions:
     manual_approval_selected: str = "MANUAL_APPROVAL_SELECTED"
-    create_userpool_selected: str = "CREATE_USERPOOL_SELECTED"
 
     alt_full_domain_name_specified: str = "ALT_FULL_DOMAIN_NAME_SPECIFIED"
     alt_certificate_arn: str = "ALT_CERTIFICATE_ARN"
@@ -28,22 +25,6 @@ class Conditions:
     def __init__(self, t: Template, p: Parameters) -> None:
         t.add_condition(
             self.manual_approval_selected, Equals(Ref(p.manual_approval), "True")
-        )
-
-        t.add_condition(
-            self.create_userpool_selected,
-            Equals(
-                ImportValue(
-                    Join(
-                        "",
-                        [
-                            Ref(p.deployment_id),
-                            "-AuthCreateUserPool",
-                        ],
-                    )
-                ),
-                "True",
-            ),
         )
 
         t.add_condition(

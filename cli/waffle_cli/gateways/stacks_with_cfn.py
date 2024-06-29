@@ -21,7 +21,7 @@ class StacksWithCfn(Stacks):
         stack_state: CfnStackState | None,
     ):
         c = self._get_client(deployment_id, aws_region)
-        if stack_state is not None:
+        if stack_state is None:
             return c.create_stack
         return c.update_stack
 
@@ -43,7 +43,7 @@ class StacksWithCfn(Stacks):
         try:
             response = f(
                 StackName=(
-                    (stack_state.cfn_stack_id if stack_state is not None else stack_id),
+                    stack_state.cfn_stack_id if stack_state is not None else stack_id
                 ),
                 TemplateURL=template_url,
                 Capabilities=["CAPABILITY_NAMED_IAM"],
@@ -76,7 +76,7 @@ class StacksWithCfn(Stacks):
                 stacks.extend(
                     [(s["StackId"], s["StackStatus"]) for s in response["Stacks"]]
                 )
-            if response["NextToken"] is None:
+            if response.get("NextToken", None) is None:
                 break
             next_token = response["NextToken"]
         return stacks

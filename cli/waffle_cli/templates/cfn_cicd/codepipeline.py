@@ -65,7 +65,7 @@ class CodePipeline:
                                                     )
                                                 ),
                                             ),
-                                            ":SecretString:token}}",
+                                            ":SecretString:github_access_token}}",
                                         ],
                                     ),
                                     "PollForSourceChanges": False,
@@ -233,7 +233,7 @@ class CodePipeline:
                                     )
                                 ),
                             ),
-                            ":SecretString:token}}",
+                            ":SecretString:github_access_token}}",
                         ],
                     )
                 ),

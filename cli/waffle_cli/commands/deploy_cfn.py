@@ -220,7 +220,7 @@ class DeployCfn(Command):
         print(
             "\n\n"
             + BLUE
-            + "Deploying static fileserving (web frontend)."
+            + "Deploying a stack defined as a cloudformation template."
             + NEUTRAL
             + "\n\n"
         )

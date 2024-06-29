@@ -18,7 +18,7 @@ def generate_cfn_cicd_stack_json() -> str:
     secret = Secret(t, params)
     roles = Roles(t, params, conditions, secret)
     artifacts_bucket = ArtifactsBucket(t)
-    cicd_roles = CicdRoles(t, params, artifacts_bucket)
+    cicd_roles = CicdRoles(t, params, artifacts_bucket, roles)
     CodebuildProject(t, params, conditions, artifacts_bucket, roles, secret, cicd_roles)
     CodePipeline(t, params, conditions, artifacts_bucket, cicd_roles)
     ArtifactsBucketPolicy(t, artifacts_bucket, cicd_roles)

@@ -56,7 +56,7 @@ class DeployAuthUserPool(Command):
             generate_stack_json=generate_auth_stack_json,
             parameter_list=generate_auth_parameter_list(
                 deployment_id=deployment_id,
-                create_userpool="True",
+                allow_admin_create_user_only=True,
             ),
             stack_type=StackType.auth,
             include_in_the_project=False,

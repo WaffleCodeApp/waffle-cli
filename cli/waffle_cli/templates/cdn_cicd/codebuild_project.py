@@ -118,18 +118,14 @@ class CodebuildProject:
                             Value=If(
                                 c.custom_user_pool_ref,
                                 Ref(p.user_pool_ref),
-                                If(
-                                    c.create_userpool_selected,
-                                    ImportValue(
-                                        Join(
-                                            "",
-                                            [
-                                                Ref(p.deployment_id),
-                                                "-AuthUserPoolRef",
-                                            ],
-                                        )
-                                    ),
-                                    "",
+                                ImportValue(
+                                    Join(
+                                        "",
+                                        [
+                                            Ref(p.deployment_id),
+                                            "-AuthUserPoolRef",
+                                        ],
+                                    )
                                 ),
                             ),
                         ),
@@ -138,18 +134,14 @@ class CodebuildProject:
                             Value=If(
                                 c.custom_auth_web_client,
                                 Ref(p.auth_web_client),
-                                If(
-                                    c.create_userpool_selected,
-                                    ImportValue(
-                                        Join(
-                                            "",
-                                            [
-                                                Ref(p.deployment_id),
-                                                "-AuthUserPoolClientWebRef",
-                                            ],
-                                        )
-                                    ),
-                                    "",
+                                ImportValue(
+                                    Join(
+                                        "",
+                                        [
+                                            Ref(p.deployment_id),
+                                            "-AuthUserPoolClientWebRef",
+                                        ],
+                                    )
                                 ),
                             ),
                         ),

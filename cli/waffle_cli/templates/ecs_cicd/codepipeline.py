@@ -68,7 +68,7 @@ class CodePipeline:
                                                     )
                                                 ),
                                             ),
-                                            ":SecretString:token}}",
+                                            ":SecretString:github_access_token}}",
                                         ],
                                     ),
                                     # "OAuthToken": "{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:948939170092:secret:GithubSecret-xSqGTe0Uo6La-bZ08hQ:SecretString:token}}",
@@ -207,7 +207,7 @@ class CodePipeline:
                                     )
                                 ),
                             ),
-                            ":SecretString:token}}",
+                            ":SecretString:github_access_token}}",
                         ],
                     )
                 ),

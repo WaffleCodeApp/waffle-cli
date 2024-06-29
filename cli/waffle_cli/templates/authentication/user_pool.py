@@ -1,26 +1,28 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
     GetAtt,
+    If,
     Join,
     Ref,
     cognito,
     Template,
 )
+
 from .parameters import Parameters
 from .roles import Roles
+from .conditions import Conditions
 
 
 class UserPool:
     user_pool: cognito.UserPool
     web_client: cognito.UserPoolClient
 
-    def __init__(self, t: Template, p: Parameters, r: Roles):
+    def __init__(self, t: Template, p: Parameters, r: Roles, c: Conditions):
         self.user_pool = t.add_resource(
             cognito.UserPool(
                 "AuthMFAUserPool",
                 AdminCreateUserConfig=cognito.AdminCreateUserConfig(
-                    AllowAdminCreateUserOnly=True,
-                    InviteMessageTemplate=cognito.InviteMessageTemplate(
-                        SMSMessage=Ref(p.invitation_sms_text)
+                    AllowAdminCreateUserOnly=If(
+                        c.allow_admin_create_user_only, True, False
                     ),
                 ),
                 AutoVerifiedAttributes=["phone_number"],
@@ -63,16 +65,7 @@ class UserPool:
                         AttributeDataType="String",
                         DeveloperOnlyAttribute=True,
                     ),
-                    cognito.SchemaAttribute(
-                        Name="projects",
-                        Required=False,
-                        Mutable=True,
-                        AttributeDataType="String",
-                        DeveloperOnlyAttribute=True,
-                    ),
                 ],
-                SmsAuthenticationMessage=Ref(p.authentication_sms_text),
-                SmsVerificationMessage=Ref(p.verification_sms_text),
                 SmsConfiguration=cognito.SmsConfiguration(
                     # The docs have bugs
                     # https://forums.aws.amazon.com/thread.jspa?threadID=250495
