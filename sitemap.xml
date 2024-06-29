@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://wafflecodeapp.github.io/waffle-cli/</loc>
+         <lastmod>2024-06-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://wafflecodeapp.github.io/waffle-cli/quickstart/</loc>
+         <lastmod>2024-06-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://wafflecodeapp.github.io/waffle-cli/terminology/</loc>
+         <lastmod>2024-06-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://wafflecodeapp.github.io/waffle-cli/get_started/</loc>
+         <lastmod>2024-06-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://wafflecodeapp.github.io/waffle-cli/reference/create_deployment_settings/</loc>
+         <lastmod>2024-06-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://wafflecodeapp.github.io/waffle-cli/reference/deployment_settings_file/</loc>
+         <lastmod>2024-06-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
