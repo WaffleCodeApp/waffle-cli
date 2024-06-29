@@ -1,7 +1,6 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
     Export,
     GetAtt,
-    If,
     Join,
     Output,
     Ref,
@@ -11,35 +10,16 @@ from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
 from .user_pool import UserPool
 from .idenity_pool import IdentityPool
 from .parameters import Parameters
-from .conditions import Conditions
 
 
 class Outputs:
-    def __init__(
-        self, t: Template, up: UserPool, ip: IdentityPool, p: Parameters, c: Conditions
-    ):
+    def __init__(self, t: Template, up: UserPool, ip: IdentityPool, p: Parameters):
         t.add_output(
             [
                 Output(
-                    "AuthCreateUserPool",
-                    Description="AuthCreateUserPool",
-                    Value=If(
-                        c.create_userpool_selected,
-                        "True",
-                        "False",
-                    ),
-                    Export=Export(
-                        name=Join("", [Ref(p.deployment_id), "-AuthCreateUserPool"])
-                    ),
-                ),
-                Output(
                     "AuthUserPoolRef",
                     Description="AuthUserPoolRef",
-                    Value=If(
-                        c.create_userpool_selected,
-                        Ref(up.user_pool),
-                        "*",
-                    ),
+                    Value=Ref(up.user_pool),
                     Export=Export(
                         name=Join("", [Ref(p.deployment_id), "-AuthUserPoolRef"])
                     ),
@@ -47,11 +27,7 @@ class Outputs:
                 Output(
                     "AuthUserPoolArn",
                     Description="AuthUserPoolArn",
-                    Value=If(
-                        c.create_userpool_selected,
-                        GetAtt(up.user_pool, "Arn"),
-                        "*",
-                    ),
+                    Value=GetAtt(up.user_pool, "Arn"),
                     Export=Export(
                         name=Join("", [Ref(p.deployment_id), "-AuthUserPoolArn"])
                     ),
@@ -59,11 +35,7 @@ class Outputs:
                 Output(
                     "AuthUserPoolClientWebRef",
                     Description="AuthUserPoolClientWebRef",
-                    Value=If(
-                        c.create_userpool_selected,
-                        Ref(up.web_client),
-                        "*",
-                    ),
+                    Value=Ref(up.web_client),
                     Export=Export(
                         name=Join(
                             "", [Ref(p.deployment_id), "-AuthUserPoolClientWebRef"]

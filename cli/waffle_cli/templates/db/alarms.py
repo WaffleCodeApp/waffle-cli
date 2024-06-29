@@ -28,6 +28,7 @@ class Alarms:
         t.add_resource(
             cloudwatch.Alarm(
                 "CPUUtilizationAlarm",
+                Condition=c.alarms_enabled,
                 ActionsEnabled=True,
                 AlarmActions=[
                     If(
@@ -80,6 +81,7 @@ class Alarms:
         t.add_resource(
             cloudwatch.Alarm(
                 "MaxUsedTxIDsAlarm",
+                Condition=c.alarms_enabled,
                 ActionsEnabled=True,
                 AlarmActions=[
                     If(
@@ -133,6 +135,7 @@ class Alarms:
         t.add_resource(
             cloudwatch.Alarm(
                 "FreeLocalStorageAlarm",
+                Condition=c.alarms_enabled,
                 ActionsEnabled=True,
                 AlarmActions=[
                     If(
@@ -185,6 +188,7 @@ class Alarms:
         t.add_resource(
             cloudwatch.Alarm(
                 "FreeableMemoryAlarm",
+                Condition=c.alarms_enabled,
                 ActionsEnabled=True,
                 AlarmActions=[
                     If(
@@ -237,7 +241,7 @@ class Alarms:
         t.add_resource(
             rds.EventSubscription(
                 "AuroraClusterEventSubscription",
-                Condition=c.aurora_selected,
+                Condition=c.aurora_alarms_enabled,
                 EventCategories=["failover", "failure", "notification"],
                 SnsTopicArn=If(
                     c.custom_alerts_sns_ref,
@@ -258,6 +262,7 @@ class Alarms:
         t.add_resource(
             rds.EventSubscription(
                 "InstanceEventSubscription",
+                Condition=c.aurora_alarms_enabled,
                 EventCategories=[
                     "availability",
                     "configuration change",
@@ -296,7 +301,7 @@ class Alarms:
         t.add_resource(
             rds.EventSubscription(
                 "DBParameterGroupEventSubscription",
-                Condition=c.aurora_selected,
+                Condition=c.aurora_alarms_enabled,
                 EventCategories=["configuration change"],
                 SnsTopicArn=If(
                     c.custom_alerts_sns_ref,

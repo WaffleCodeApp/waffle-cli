@@ -1,10 +1,8 @@
 from troposphere import Parameter, Template  # pyright: ignore[reportMissingTypeStubs]
-from application_logic.entities.deployment_type import DeploymentType
 
 
 class Parameters:
     deployment_id: Parameter
-    deployment_type: Parameter
     database_id: Parameter
     storage_size: Parameter
     family: Parameter
@@ -18,24 +16,14 @@ class Parameters:
     secondary_private_subnet_ref: Parameter
     local_incoming_connections_sg: Parameter
     alerts_sns_ref: Parameter
+    multi_az: Parameter
+    log_retention_days: Parameter
+    alarms_enabled: Parameter
+    backup_retention: Parameter
 
     def __init__(self, t: Template):
         self.deployment_id = t.add_parameter(
             Parameter("DeploymentId", Description="deployment_id", Type="String")
-        )
-
-        self.deployment_type = t.add_parameter(
-            Parameter(
-                "DeploymentType",
-                Description="[ %s ]"
-                % " | ".join(
-                    [
-                        DeploymentType.DEV.value,
-                        DeploymentType.PROD.value,
-                    ]
-                ),
-                Type="String",
-            )
         )
 
         self.database_id = t.add_parameter(
@@ -149,5 +137,43 @@ class Parameters:
                 Description="The ref of the sns topic to deliver alarms",
                 Type="String",
                 Default="",
+            )
+        )
+
+        self.multi_az = t.add_parameter(
+            Parameter(
+                "MultiAZ",
+                Description="Boolean to setup replica creation for RDS",
+                Type="String",
+                AllowedValues=["True", "False"],
+                Default="True",
+            )
+        )
+
+        self.log_retention_days = t.add_parameter(
+            Parameter(
+                "LogRetentionDays",
+                Description="(optional) Days how long logs to be retained.",
+                Type="String",
+                Default="365",
+            )
+        )
+
+        self.alarms_enabled = t.add_parameter(
+            Parameter(
+                "AlarmsEnabled",
+                Description="(optional) If system alarms should be set up.",
+                Type="String",
+                AllowedValues=["True", "False"],
+                Default="True",
+            )
+        )
+
+        self.backup_retention = t.add_parameter(
+            Parameter(
+                "BackupRetention",
+                Description="(optional) Days how long automated backups should be retained",
+                Type="String",
+                Default="35",
             )
         )

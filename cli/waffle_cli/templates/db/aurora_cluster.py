@@ -98,7 +98,7 @@ class AuroraCluster:
                         ),
                     )
                 ],
-                BackupRetentionPeriod=If(c.is_prod, 35, 2),
+                BackupRetentionPeriod=Ref(p.backup_retention),
                 DBClusterParameterGroupName=Ref(cpg),
                 KmsKeyId=If(
                     c.use_snapshot,
@@ -134,18 +134,20 @@ class AuroraCluster:
                 Engine=engine,
                 EngineVersion=Ref(p.postgres_engine_version),
                 DBParameterGroupName=Ref(dbpg.group),
-                MonitoringInterval=If(c.is_prod, 1, 0),
+                MonitoringInterval=If(c.aurora_alarms_enabled, 1, 0),
                 MonitoringRoleArn=If(
-                    c.is_prod,
+                    c.aurora_alarms_enabled,
                     GetAtt(mr.role, "Arn"),
                     Ref("AWS::NoValue"),
                 ),
-                AutoMinorVersionUpgrade=If(c.is_prod, False, True),
+                AutoMinorVersionUpgrade=If(c.aurora_alarms_enabled, False, True),
                 DBSubnetGroupName=Ref(dbsg.group),
                 PubliclyAccessible=False,
                 EnablePerformanceInsights=True,
                 PerformanceInsightsKMSKeyId=Ref(dbk.key),
-                PerformanceInsightsRetentionPeriod=If(c.is_prod, 731, 7),
+                PerformanceInsightsRetentionPeriod=If(
+                    c.aurora_alarms_enabled, p.log_retention_days, 7
+                ),
             )
         )
 
@@ -159,17 +161,17 @@ class AuroraCluster:
                 Engine=engine,
                 EngineVersion=Ref(p.postgres_engine_version),
                 DBParameterGroupName=Ref(dbpg.group),
-                MonitoringInterval=If(c.is_prod, 1, 0),
+                MonitoringInterval=If(c.aurora_alarms_enabled, 1, 0),
                 MonitoringRoleArn=If(
-                    c.is_prod,
+                    c.aurora_alarms_enabled,
                     GetAtt(mr.role, "Arn"),
                     Ref("AWS::NoValue"),
                 ),
-                AutoMinorVersionUpgrade=If(c.is_prod, False, True),
+                AutoMinorVersionUpgrade=If(c.aurora_alarms_enabled, False, True),
                 DBSubnetGroupName=Ref(dbsg.group),
                 PubliclyAccessible=False,
                 EnablePerformanceInsights=True,
                 PerformanceInsightsKMSKeyId=Ref(dbk.key),
-                PerformanceInsightsRetentionPeriod=If(c.is_prod, 731, 7),
+                PerformanceInsightsRetentionPeriod=Ref(p.log_retention_days),
             )
         )

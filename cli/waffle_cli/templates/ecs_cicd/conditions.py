@@ -6,12 +6,10 @@ from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
     Ref,
     Template,
 )
-from application_logic.entities.deployment_type import DeploymentType
 from .parameters import Parameters
 
 
 class Conditions:
-    is_prod: str = "IS_PROD"
     manual_approval_selected: str = "MANUAL_APPROVAL_SELECTED"
     create_userpool_selected: str = "CREATE_USERPOOL_SELECTED"
 
@@ -31,11 +29,6 @@ class Conditions:
     custom_deployment_secret_arn: str = "CUSTOM_DEPLOYMENT_SECRET_ARN"
 
     def __init__(self, t: Template, p: Parameters) -> None:
-        t.add_condition(
-            self.is_prod,
-            Equals(Ref(p.deployment_type), DeploymentType.PROD.value),
-        )
-
         t.add_condition(
             self.manual_approval_selected, Equals(Ref(p.manual_approval), "True")
         )

@@ -1,10 +1,8 @@
 from troposphere import Parameter, Template  # pyright: ignore[reportMissingTypeStubs]
-from application_logic.entities.deployment_type import DeploymentType
 
 
 class Parameters:
     deployment_id: Parameter
-    deployment_type: Parameter
     pipeline_id: Parameter
     manual_approval: Parameter
     instance_count: Parameter
@@ -36,31 +34,25 @@ class Parameters:
 
     def __init__(self, t: Template):
         self.deployment_id = t.add_parameter(
-            Parameter("DeploymentId", Description="deployment_id", Type="String")
-        )
-
-        self.deployment_type = t.add_parameter(
             Parameter(
-                "DeploymentType",
-                Description="[ %s ]"
-                % " | ".join(
-                    [
-                        DeploymentType.DEV.value,
-                        DeploymentType.PROD.value,
-                    ]
-                ),
+                "DeploymentId",
+                Description="The ID of an existing Waffle deployment to deploy into.",
                 Type="String",
             )
         )
 
         self.pipeline_id = t.add_parameter(
-            Parameter("PipelineId", Description="pipeline_id", Type="String")
+            Parameter(
+                "PipelineId",
+                Description="An ID that will represent the CICD pipeline. Recommended to use a human-understanable name that explains the purpose, like for example 'frontend' or 'adminui'.",
+                Type="String",
+            )
         )
 
         self.manual_approval = t.add_parameter(
             Parameter(
                 "CICDManualApproval",
-                Description="Is manual approval required before deployment?",
+                Description="Whether a manual approval step is included in the CICD pipeline before deployment.",
                 Type="String",
                 AllowedValues=["True", "False"],
                 Default="True",
@@ -78,7 +70,10 @@ class Parameters:
 
         self.vpc_ref = t.add_parameter(
             Parameter(
-                "VPCRef", Description="(optional) The VPC", Type="String", Default=""
+                "VPCRef",
+                Description="(optional) The REF of the VPC to deploy to",
+                Type="String",
+                Default="",
             )
         )
 
@@ -112,7 +107,7 @@ class Parameters:
         self.local_outgoing_connection_security_group_id = t.add_parameter(
             Parameter(
                 "LocalOutgoingConnectionSecurityGroupId",
-                Description="(optional) Local outbound enabled SG",
+                Description="(optional) Local outbound traffic enabling Security Group",
                 Type="String",
                 Default="",
             )
@@ -121,7 +116,7 @@ class Parameters:
         self.nat_outgoing_connection_security_group_id = t.add_parameter(
             Parameter(
                 "NatOutgoingConnectionSecurityGroupId",
-                Description="(optional) NAT outbound enabled SG",
+                Description="(optional) NAT outbound traffic enabling Security Group",
                 Type="String",
                 Default="",
             )
@@ -130,7 +125,7 @@ class Parameters:
         self.ecr_incoming_connection_security_group_id = t.add_parameter(
             Parameter(
                 "EcrIncomingConnectionSecurityGroupId",
-                Description="(optional) Local inbound enabled SG",
+                Description="(optional) Network traffic to ECR enabling Security Group",
                 Type="String",
                 Default="",
             )
@@ -138,15 +133,6 @@ class Parameters:
 
         self.github_owner = t.add_parameter(
             Parameter("GithubOwner", Description="Github account name", Type="String")
-        )
-
-        self.github_secret_arn = t.add_parameter(
-            Parameter(
-                "GithubSecretArn",
-                Description="(optional) The arn of the github_secret",
-                Type="String",
-                Default="",
-            )
         )
 
         self.github_repo_name = t.add_parameter(
@@ -182,6 +168,15 @@ class Parameters:
             )
         )
 
+        self.github_secret_arn = t.add_parameter(
+            Parameter(
+                "GithubSecretArn",
+                Description="(optional) The arn of the github_secret",
+                Type="String",
+                Default="",
+            )
+        )
+
         self.user_pool_arn = t.add_parameter(
             Parameter(
                 "AuthUserPoolArn",
@@ -203,8 +198,7 @@ class Parameters:
         self.root_resource_id = t.add_parameter(
             Parameter(
                 "RootResourceId",
-                Description="(optional) The ID of the API GW resource to deploy the new"
-                "resources as children",
+                Description="(optional) The ID of the API GW resource to deploy the new HTTP endpoint resources as children",
                 Type="String",
                 Default="",
             )
@@ -213,7 +207,7 @@ class Parameters:
         self.alerts_sns_ref = t.add_parameter(
             Parameter(
                 "AlertsSnsTopicRef",
-                Description="(optional) The ref of the sns topic to deliver alarms",
+                Description="(optional) The REF of the SNS Topic to send alarms to",
                 Type="String",
                 Default="",
             )
@@ -222,7 +216,7 @@ class Parameters:
         self.deployment_secret_arn = t.add_parameter(
             Parameter(
                 "DeploymentSecretArn",
-                Description="(optional) The arn of the deployment_secret",
+                Description="(optional) The ARN of the deployment specific secret",
                 Type="String",
                 Default="",
             )
@@ -231,7 +225,7 @@ class Parameters:
         self.runtime_json = t.add_parameter(
             Parameter(
                 "RuntimeJson",
-                Description="(optional) A JSON that will be passed to the running instance",
+                Description="(optional) A JSON that will be passed to the running instance as an environmental variable",
                 Type="String",
                 Default="{}",
             )
@@ -240,7 +234,7 @@ class Parameters:
         self.build_env_vars_json = t.add_parameter(
             Parameter(
                 "BuildEnvVarsJson",
-                Description="(optional) A JSON that will be used as env var during build",
+                Description="(optional) A JSON string to be passed to the build script as an environmental variable.",
                 Type="String",
                 Default="{}",
             )
@@ -249,7 +243,7 @@ class Parameters:
         self.ecs_task_cpu = t.add_parameter(
             Parameter(
                 "EcsTaskCPU",
-                Description="(optional) CPU capacity (for example 256 or 1024)",
+                Description="(optional) CPU capacity of a single deployed instance (for example 256 or 1024)",
                 Type="String",
                 Default="256",
             )

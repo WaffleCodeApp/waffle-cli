@@ -113,10 +113,6 @@ class EcsTask:
                                 Value=Ref(p.deployment_id),
                             ),
                             ecs.Environment(
-                                Name="DEPLOYMENT_TYPE",
-                                Value=Ref(p.deployment_type),
-                            ),
-                            ecs.Environment(
                                 Name="PIPELINE_ID",
                                 Value=Ref(p.pipeline_id),
                             ),

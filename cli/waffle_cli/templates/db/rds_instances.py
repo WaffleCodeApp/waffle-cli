@@ -52,7 +52,7 @@ class RdsInstances:
                 Engine=engine,
                 EngineVersion=Ref(p.postgres_engine_version),
                 DBInstanceClass=Ref(p.instance_class),
-                MultiAZ=If(c.is_prod, True, False),
+                MultiAZ=If(c.multi_az, True, False),
                 DBParameterGroupName=Ref(dpg.group),
                 MasterUsername=If(
                     c.use_snapshot,
@@ -94,7 +94,7 @@ class RdsInstances:
                         ),
                     )
                 ],
-                BackupRetentionPeriod=If(c.is_prod, 35, 2),
+                BackupRetentionPeriod=Ref(p.backup_retention),
                 KmsKeyId=If(
                     c.use_snapshot,
                     Ref("AWS::NoValue"),
@@ -107,17 +107,17 @@ class RdsInstances:
                     Ref("AWS::NoValue"),
                 ),
                 StorageEncrypted=If(c.use_snapshot, Ref("AWS::NoValue"), True),
-                MonitoringInterval=If(c.is_prod, 1, 0),
+                MonitoringInterval=If(c.alarms_enabled, 1, 0),
                 MonitoringRoleArn=If(
-                    c.is_prod,
+                    c.alarms_enabled,
                     GetAtt(mr.role, "Arn"),
                     Ref("AWS::NoValue"),
                 ),
-                AutoMinorVersionUpgrade=If(c.is_prod, False, True),
+                AutoMinorVersionUpgrade=False,
                 PubliclyAccessible=False,
                 EnablePerformanceInsights=True,
                 PerformanceInsightsKMSKeyId=Ref(dbk.key),
-                PerformanceInsightsRetentionPeriod=If(c.is_prod, 731, 7),
+                PerformanceInsightsRetentionPeriod=Ref(p.log_retention_days),
                 DeletionProtection=False,
             )
         )
