@@ -6,7 +6,6 @@ from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
     Template,
 )
 from .parameters import Parameters
-from .conditions import Conditions
 from .roles import Roles
 
 
@@ -14,11 +13,10 @@ class UserPool:
     user_pool: cognito.UserPool
     web_client: cognito.UserPoolClient
 
-    def __init__(self, t: Template, p: Parameters, c: Conditions, r: Roles):
+    def __init__(self, t: Template, p: Parameters, r: Roles):
         self.user_pool = t.add_resource(
             cognito.UserPool(
                 "AuthMFAUserPool",
-                Conditions=[c.create_userpool_selected],
                 AdminCreateUserConfig=cognito.AdminCreateUserConfig(
                     AllowAdminCreateUserOnly=True,
                     InviteMessageTemplate=cognito.InviteMessageTemplate(

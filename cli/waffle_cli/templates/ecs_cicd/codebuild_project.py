@@ -106,10 +106,6 @@ class CodebuildProject:
                             Value=Ref(p.deployment_id),
                         ),
                         codebuild.EnvironmentVariable(
-                            Name="DEPLOYMENT_TYPE",
-                            Value=Ref(p.deployment_type),
-                        ),
-                        codebuild.EnvironmentVariable(
                             Name="PIPELINE_ID",
                             Value=Ref(p.pipeline_id),
                         ),

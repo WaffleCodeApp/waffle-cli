@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from .commands import COMMANDS, get_command
+from .utils.std_colors import GREEN, NEUTRAL
 
 
 def _get_command_parser(with_help: bool, command: str | None = None):
@@ -45,6 +46,7 @@ def main():
     arguments = vars(parser.parse_args())
 
     command.execute(**arguments)
+    print(GREEN + "Done.\n" + NEUTRAL)
 
 
 if __name__ == "__main__":

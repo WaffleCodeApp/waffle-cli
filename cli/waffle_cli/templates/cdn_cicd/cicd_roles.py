@@ -38,7 +38,7 @@ class CicdRoles:
                             "Statement": [
                                 {
                                     "Effect": "Allow",
-                                    "Action": ["codebuild:*", "iam:PassRole"],
+                                    "Action": ["codebuild:*"],
                                     "Resource": "*",
                                 },
                                 {
@@ -189,11 +189,6 @@ class CicdRoles:
                                             ],
                                         ),
                                     ],
-                                },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": ["iam:PassRole"],
-                                    "Resource": "*",
                                 },
                             ],
                         },

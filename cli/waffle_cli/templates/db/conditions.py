@@ -1,15 +1,14 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
+    And,
     Equals,
     Not,
     Ref,
     Template,
 )
-from application_logic.entities.deployment_type import DeploymentType
 from .parameters import Parameters
 
 
 class Conditions:
-    is_prod: str = "IS_PROD"
     use_snapshot: str = "USE_SNAPSHOT"
     create_replica: str = "CREATE_REPLICA"
     aurora_selected: str = "AURORA_SELECTED"
@@ -20,13 +19,11 @@ class Conditions:
     custom_local_incoming_connections_sg: str = "CUSTOM_LOCAL_INCOMMING_CONNECTIONS_SG"
     # custom_deployment_secret_arn: str = "CUSTOM_DEPLOYMENT_SECRET_ARN"
     custom_alerts_sns_ref: str = "CUSTOM_ALERT_SNS_REF"
+    alarms_enabled: str = "ALARMS_ENABLED"
+    aurora_alarms_enabled: str = "AURORA_ALARMS_ENABLED"
+    multi_az: str = "MULTI_AZ"
 
     def __init__(self, t: Template, p: Parameters) -> None:
-        t.add_condition(
-            self.is_prod,
-            Equals(Ref(p.deployment_type), DeploymentType.PROD.value),
-        )
-
         t.add_condition(
             self.use_snapshot,
             Not(Equals(Ref(p.snapshot_id), "")),
@@ -75,4 +72,20 @@ class Conditions:
         t.add_condition(
             self.custom_alerts_sns_ref,
             Not(Equals(Ref(p.alerts_sns_ref), "")),
+        )
+
+        t.add_condition(
+            self.alarms_enabled,
+            Equals(Ref(p.alarms_enabled), "True"),
+        )
+
+        t.add_condition(
+            self.aurora_alarms_enabled,
+            And(
+                Equals(Ref(p.alarms_enabled), "True"), Equals(Ref(p.db_type), "aurora")
+            ),
+        )
+        t.add_condition(
+            self.multi_az,
+            Equals(Ref(p.multi_az), "True"),
         )

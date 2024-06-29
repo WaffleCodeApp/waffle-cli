@@ -1,13 +1,20 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from ..application_logic.entities.deployment_setting import DeploymentSetting
-from ..application_logic.entities.stack_settings.github_stack_setting import GithubStackSetting
+from ..application_logic.entities.cfn_stack_state import CfnStackState
+from ..application_logic.entities.deployment_state import DeploymentState
 from ..application_logic.entities.stack_type import StackType
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
-from ..templates.github import generate_github_parameter_list, generate_github_stack_json
+from ..templates.github import (
+    generate_github_parameter_list,
+    generate_github_stack_json,
+)
 from .command_type import Command
+from .utils.deploy_new_stack import deploy_new_stack
+
+STACK_ID = "waffle-github"
+TEMPLATE_NAME = f"{STACK_ID}.json"
 
 
 class DeployGithub(Command):
@@ -27,57 +34,65 @@ class DeployGithub(Command):
             help="An existing deployment ID that you add local credentials for",
             choices=gateways.deployment_settings.get_names(),
         )
+        parser.add_argument("access_token", help="GitHub access token", default="")
 
     @staticmethod
     def execute(
         deployment_id: str | None = None,
+        access_token: str | None = None,
         gateways: Gateways = gateway_implementations,
         **_: Any,
     ) -> None:
         assert deployment_id is not None
+        assert access_token is not None
 
-        setting: DeploymentSetting | None = gateways.deployment_settings.get(
-            deployment_id
-        )
-        if setting is None:
-            raise Exception("setting not found for deployment_id")
-
-        if not setting.template_bucket_name:
-            raise Exception("Template bucket name is None")
-
-        if not setting.aws_region:
-            raise Exception("AWS region is None")
-
-        if not setting.deployment_type:
-            raise Exception("Deployment type is None")
-
-        gateways.deployment_template_bucket.create_bucket_if_not_exist(
-            deployment_id, setting.template_bucket_name, setting.aws_region
-        )
-
-        github_template_url: str = gateways.deployment_template_bucket.upload_obj(
+        deploy_new_stack(
             deployment_id=deployment_id,
-            bucket_name=setting.template_bucket_name,
-            aws_region=setting.aws_region,
-            key="github-template.json",
-            content=generate_github_stack_json(),
-        )
-
-        if setting.github_stack_setting is None:
-            setting.github_stack_setting = GithubStackSetting(
-            )
-
-        
-        gateways.deployment_settings.create_or_update(setting)
-
-        cfn_stack_id = gateways.stacks.create_or_update_stack(
-            template_url=github_template_url,
-            setting=setting,
-            parameters=generate_github_parameter_list(
-                deployment_id=setting.deployment_id,
+            stack_id=STACK_ID,
+            template_name=TEMPLATE_NAME,
+            generate_stack_json=generate_github_stack_json,
+            parameter_list=generate_github_parameter_list(
+                deployment_id=deployment_id,
             ),
             stack_type=StackType.github,
+            include_in_the_project=False,
         )
 
-        setting.github_stack_setting.cfn_stack_id = cfn_stack_id
-        gateways.deployment_settings.create_or_update(setting)
+        deployment_setting = gateways.deployment_settings.get(deployment_id)
+        assert deployment_setting is not None
+        assert deployment_setting.aws_region is not None
+
+        gateways.stacks.wait_for_stacks_to_create_or_update(
+            deployment_id, deployment_setting.aws_region, [STACK_ID]
+        )
+
+        deployment_state: DeploymentState = gateways.deployment_states.get(
+            deployment_id
+        ) or DeploymentState(deployment_id=deployment_id)
+
+        deployment_stack: CfnStackState | None = next(
+            (stack for stack in deployment_state.stacks if stack.stack_id == STACK_ID),
+            None,
+        )
+
+        assert deployment_stack is not None
+
+        secret_physical_resource_id = (
+            gateways.stacks.get_physical_resource_id_from_stack(
+                deployment_id=deployment_id,
+                aws_region=deployment_setting.aws_region,
+                cfn_stack_id=deployment_stack.cfn_stack_id,
+                logical_resource_id="GithubSecret",
+            )
+        )
+        secret_arn = gateways.github_secrets.get_secret_arn_from_physical_resource_id(
+            deployment_id=deployment_id,
+            aws_region=deployment_setting.aws_region,
+            physical_resource_id=secret_physical_resource_id,
+        )
+        gateways.github_secrets.store_access_token(
+            deployment_id=deployment_id,
+            aws_region=deployment_setting.aws_region,
+            secret_arn=secret_arn,
+            access_token=access_token,
+        )

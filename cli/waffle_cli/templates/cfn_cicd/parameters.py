@@ -1,10 +1,8 @@
 from troposphere import Parameter, Template  # pyright: ignore[reportMissingTypeStubs]
-from application_logic.entities.deployment_type import DeploymentType
 
 
 class Parameters:
     deployment_id: Parameter
-    deployment_type: Parameter
     pipeline_id: Parameter
     manual_approval: Parameter
     full_domain_name: Parameter
@@ -32,23 +30,13 @@ class Parameters:
     deployment_secret_arn: Parameter
     github_secret_arn: Parameter
 
+    build_env_vars_json: Parameter
+    log_retention_days: Parameter
+    alarms_enabled: Parameter
+
     def __init__(self, t: Template):
         self.deployment_id = t.add_parameter(
             Parameter("DeploymentId", Description="deployment_id", Type="String")
-        )
-
-        self.deployment_type = t.add_parameter(
-            Parameter(
-                "DeploymentType",
-                Description="[ %s ]"
-                % " | ".join(
-                    [
-                        DeploymentType.DEV.value,
-                        DeploymentType.PROD.value,
-                    ]
-                ),
-                Type="String",
-            )
         )
 
         self.pipeline_id = t.add_parameter(
@@ -259,5 +247,33 @@ class Parameters:
                 Description="(optional) The arn of the github_secret",
                 Type="String",
                 Default="",
+            )
+        )
+
+        self.build_env_vars_json = t.add_parameter(
+            Parameter(
+                "BuildEnvVarsJson",
+                Description="(optional) A JSON that will be used as env var during build. ",
+                Type="String",
+                Default="{}",
+            )
+        )
+
+        self.log_retention_days = t.add_parameter(
+            Parameter(
+                "LogRetentionDays",
+                Description="(optional) Days how long logs to be retained.",
+                Type="String",
+                Default="365",
+            )
+        )
+
+        self.alarms_enabled = t.add_parameter(
+            Parameter(
+                "AlarmsEnabled",
+                Description="(optional) If system alarms should be set up.",
+                Type="String",
+                AllowedValues=["True", "False"],
+                Default="True",
             )
         )

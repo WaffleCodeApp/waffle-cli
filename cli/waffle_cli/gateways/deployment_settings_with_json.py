@@ -4,7 +4,7 @@ from ..application_logic.gateway_interfaces.deployment_settings import (
     DeploymentSettings,
 )
 
-SETTINGS_DIR = "./.waffle"
+SETTINGS_DIR = "./.waffle/deployment_settings"
 
 
 class DeploymentSettingsWithJson(DeploymentSettings):

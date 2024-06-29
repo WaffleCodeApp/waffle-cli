@@ -12,7 +12,7 @@ class MonitoringRole:
         self.role = t.add_resource(
             iam.Role(
                 "MonitoringIAMRole",
-                Condition=c.is_prod,
+                Condition=c.alarms_enabled,
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
