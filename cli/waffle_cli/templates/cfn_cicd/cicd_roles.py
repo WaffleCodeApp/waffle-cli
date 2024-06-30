@@ -109,6 +109,27 @@ class CicdRoles:
             )
         )
 
+        self.deploy_cfn_changeset_role = t.add_resource(
+            iam.Role(
+                "DeployCfnChangeSetRole",
+                AssumeRolePolicyDocument=Policy(
+                    Statement=[
+                        Statement(
+                            Effect=Allow,
+                            Action=[AssumeRole],
+                            Principal=Principal(
+                                "Service", ["codedeploy.amazonaws.com"]
+                            ),
+                        )
+                    ]
+                ),
+                ManagedPolicyArns=[
+                    "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda",
+                    "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForCloudFormation",
+                ],
+            )
+        )
+
         self.deploy_cfn_role = t.add_resource(
             iam.Role(
                 "DeployCfnRole",
@@ -118,7 +139,10 @@ class CicdRoles:
                             Effect=Allow,
                             Action=[AssumeRole],
                             Principal=Principal(
-                                "Service", ["cloudformation.amazonaws.com"]
+                                "Service",
+                                [
+                                    "cloudformation.amazonaws.com",
+                                ],
                             ),
                         )
                     ]
@@ -150,12 +174,13 @@ class CicdRoles:
                                         "iam:ListInstanceProfiles",
                                         "iam:ListInstanceProfilesForRole",
                                         "iam:RemoveRoleFromInstanceProfile",
+                                        "iam:TagRole",
+                                        "tag:TagResources",
+                                        "tag:UntagResources",
+                                        "tag:GetResources",
+                                        "tag:GetTagKeys",
+                                        "tag:GetTagValues",
                                     ],
-                                    # NOTE: the idea is to resctrict these to
-                                    # the trs.resources that are required for deployment
-                                    # but it's impossible to tell what they would be
-                                    # it has to be done by denying access by default
-                                    # for the other existing trs.resources
                                     "Resource": "*",
                                 },
                                 {
@@ -169,6 +194,7 @@ class CicdRoles:
                                     ],
                                     "Resource": [
                                         GetAtt(r.lambda_execution_role, "Arn"),
+                                        GetAtt(self.deploy_cfn_changeset_role, "Arn"),
                                     ],
                                 },
                                 {
@@ -203,22 +229,11 @@ class CicdRoles:
                                         "lambda:*",
                                         "codedeploy:*",
                                         "ec2:*",
-                                        "cloudwatch:PutMetricAlarm",
-                                        "cloudwatch:DeleteAlarms",
+                                        "cloudwatch:*",
                                         "route53:*",
                                         "sns:*",
                                         "dynamodb:*",
                                         "sqs:*",
-                                        "cloudfront:CreateDistribution",
-                                        "cloudfront:UpdateDistribution",
-                                        "cloudfront:DeleteDistribution",
-                                        "cloudfront:TagResource",
-                                        "cloudfront:UntagResource",
-                                        # NOTE: probably a subset of trs.resources is sufficient:
-                                        # "events:DescribeRule",
-                                        # "events:DeleteRule",
-                                        # "events:PutRule",
-                                        # "events:ListRules",
                                         "events:*",
                                     ],
                                     "Resource": "*",
@@ -226,22 +241,13 @@ class CicdRoles:
                                 {
                                     "Effect": "Allow",
                                     "Action": ["apigateway:*"],
-                                    # TODO: restrict to the one passed as parameter
                                     "Resource": "*",
                                 },
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        "cloudformation:CreateChangeSet",
-                                        "cloudformation:ExecuteChangeSet",
-                                        "cloudformation:DeleteChangeSet",
-                                        "cloudformation:DeleteStack",
+                                        "cloudformation:*",
                                     ],
-                                    # NOTE: sometimes it seems to be /Include
-                                    # sometimes /Serverless-2016-10-31
-                                    # using *
-                                    # "Resource": "arn:aws:cloudformation:us-east-2:"
-                                    # "aws:transform/*",
                                     "Resource": "*",
                                 },
                             ],
@@ -256,26 +262,6 @@ class CicdRoles:
                             ],
                         ),
                     )
-                ],
-            )
-        )
-
-        self.deploy_cfn_changeset_role = t.add_resource(
-            iam.Role(
-                "DeployCfnChangeSetRole",
-                AssumeRolePolicyDocument=Policy(
-                    Statement=[
-                        Statement(
-                            Effect=Allow,
-                            Action=[AssumeRole],
-                            Principal=Principal(
-                                "Service", ["codedeploy.amazonaws.com"]
-                            ),
-                        )
-                    ]
-                ),
-                ManagedPolicyArns=[
-                    "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda"
                 ],
             )
         )
@@ -340,8 +326,8 @@ class CicdRoles:
                                         "cloudwatch:*",
                                         "sns:*",
                                         "cloudformation:*",
-                                        "rds:*",
-                                        "sqs:*",
+                                        # "rds:*",
+                                        # "sqs:*",
                                     ],
                                     "Resource": "*",
                                 },

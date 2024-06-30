@@ -5,6 +5,8 @@ from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
     Join,
     Ref,
     codepipeline,
+    codestarnotifications,
+    Sub,
     Template,
 )
 
@@ -246,5 +248,41 @@ class CodePipeline:
                 TargetAction="BuildSourceAction",
                 TargetPipelineVersion=GetAtt(pipeline, "Version"),
                 RegisterWithThirdParty=True,
+            )
+        )
+
+        t.add_resource(
+            codestarnotifications.NotificationRule(
+                "CodePipelineExecutionNotificationRule",
+                DependsOn=["Pipeline"],
+                Name=Join(
+                    "",
+                    [
+                        Ref(p.deployment_id),
+                        "-",
+                        Ref(p.pipeline_id),
+                        "-CodePipelineExecution",
+                    ],
+                ),
+                DetailType="FULL",
+                Resource=Sub(
+                    "arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${Pipeline}"
+                ),
+                EventTypeIds=[
+                    "codepipeline-pipeline-pipeline-execution-canceled",
+                    "codepipeline-pipeline-pipeline-execution-failed",
+                    "codepipeline-pipeline-pipeline-execution-resumed",
+                    "codepipeline-pipeline-pipeline-execution-started",
+                    "codepipeline-pipeline-pipeline-execution-succeeded",
+                ],
+                Targets=[
+                    codestarnotifications.Target(
+                        "CodePipelineExecutionNotificationRuleTarget",
+                        TargetType="SNS",
+                        TargetAddress=ImportValue(
+                            Join("", [Ref(p.deployment_id), "-AlertsSnsTopicRef"])
+                        ),
+                    )
+                ],
             )
         )

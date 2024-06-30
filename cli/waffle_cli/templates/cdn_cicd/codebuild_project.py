@@ -114,7 +114,7 @@ class CodebuildProject:
                             Value=Ref("AWS::Region"),
                         ),
                         codebuild.EnvironmentVariable(
-                            Name="REACT_APP_AWS_USER_POOLS_ID",
+                            Name="REACT_APP_AWS_USER_POOL_ID",
                             Value=If(
                                 c.custom_user_pool_ref,
                                 Ref(p.user_pool_ref),
@@ -130,7 +130,7 @@ class CodebuildProject:
                             ),
                         ),
                         codebuild.EnvironmentVariable(
-                            Name="REACT_APP_AWS_USER_POOLS_WEB_CLIENT_ID",
+                            Name="REACT_APP_AWS_USER_POOL_WEB_CLIENT_ID",
                             Value=If(
                                 c.custom_auth_web_client,
                                 Ref(p.auth_web_client),
