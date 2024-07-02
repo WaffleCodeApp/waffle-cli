@@ -87,10 +87,10 @@ class CicdRoles:
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-CodeBuildService-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-CodeBuildService",
                             ],
                         ),
                     )
@@ -118,44 +118,6 @@ class CicdRoles:
                         PolicyDocument={
                             "Version": "2012-10-17",
                             "Statement": [
-                                # {
-                                #     "Effect": "Allow",
-                                #     "Action": [
-                                #         "codecommit:CancelUploadArchive",
-                                #         "codecommit:GetBranch",
-                                #         "codecommit:GetCommit",
-                                #         "codecommit:GetUploadArchiveStatus",
-                                #         "codecommit:UploadArchive",
-                                #     ],
-                                #     "Resource": "*",
-                                # },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "codedeploy:CreateDeployment",
-                                        "codedeploy:GetApplicationRevision",
-                                        "codedeploy:GetDeployment",
-                                        "codedeploy:GetDeploymentConfig",
-                                        "codedeploy:RegisterApplicationRevision",
-                                    ],
-                                    "Resource": "*",
-                                },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "codebuild:BatchGetBuilds",
-                                        "codebuild:StartBuild",
-                                    ],
-                                    "Resource": "*",
-                                },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "lambda:InvokeFunction",
-                                        "lambda:ListFunctions",
-                                    ],
-                                    "Resource": "*",
-                                },
                                 {
                                     "Effect": "Allow",
                                     "Action": [
@@ -190,15 +152,23 @@ class CicdRoles:
                                         ),
                                     ],
                                 },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "codebuild:StartBuild",
+                                        "codebuild:BatchGetBuilds",
+                                    ],
+                                    "Resource": "*",
+                                },
                             ],
                         },
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-CodePipelineService-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-CodePipelineService",
                             ],
                         ),
                     )

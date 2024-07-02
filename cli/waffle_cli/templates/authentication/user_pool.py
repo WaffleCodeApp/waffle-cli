@@ -1,5 +1,4 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
-    GetAtt,
     If,
     Join,
     Ref,
@@ -19,24 +18,18 @@ class UserPool:
     def __init__(self, t: Template, p: Parameters, r: Roles, c: Conditions):
         self.user_pool = t.add_resource(
             cognito.UserPool(
-                "AuthMFAUserPool",
+                "UserPool",
                 AdminCreateUserConfig=cognito.AdminCreateUserConfig(
                     AllowAdminCreateUserOnly=If(
                         c.allow_admin_create_user_only, True, False
                     ),
                 ),
-                AutoVerifiedAttributes=["phone_number"],
-                # NOTE: we definitely need this below on a long term,
-                # I just can't get it working on the frontend.
-                # https://github.com/aws-amplify/amplify-js/issues/2087
-                # see also the frontend code
-                # https://github.com/SYRGAPP/temp-web-frontend/blob/2e18666b8af8f6f05bda73e318d31b3195f8b8a6/src/authentication/authentication.js#L43
                 # DeviceConfiguration=cognito.DeviceConfiguration(
                 #    ChallengeRequiredOnNewDevice=True,
                 #    DeviceOnlyRememberedOnUserPrompt=True
                 # ),
                 MfaConfiguration="ON",
-                EnabledMfas=["SMS_MFA"],
+                EnabledMfas=["SOFTWARE_TOKEN_MFA"],
                 Policies=cognito.Policies(
                     PasswordPolicy=cognito.PasswordPolicy(
                         MinimumLength=12,
@@ -47,9 +40,6 @@ class UserPool:
                     )
                 ),
                 Schema=[
-                    cognito.SchemaAttribute(
-                        Name="phone_number", Required=True, Mutable=True
-                    ),
                     cognito.SchemaAttribute(Name="email", Required=True, Mutable=True),
                     cognito.SchemaAttribute(
                         Name="role",
@@ -66,22 +56,16 @@ class UserPool:
                         DeveloperOnlyAttribute=True,
                     ),
                 ],
-                SmsConfiguration=cognito.SmsConfiguration(
-                    # The docs have bugs
-                    # https://forums.aws.amazon.com/thread.jspa?threadID=250495
-                    SnsCallerArn=GetAtt(r.sns_role, "Arn"),
-                    ExternalId=Ref("AWS::AccountId"),
-                ),
                 UsernameAttributes=["email"],
-                UserPoolName=Join("", [Ref(p.deployment_id), "-users-MFA"]),
+                UserPoolName=Join("", [Ref(p.deployment_id), "-users"]),
             )
         )
 
         self.web_client = t.add_resource(
             cognito.UserPoolClient(
-                "AuthUserPoolClientWeb",
-                DependsOn="AuthMFAUserPool",
-                ClientName=Join("", [Ref(p.deployment_id), "-web-MFA"]),
+                "UserPoolClientWeb",
+                DependsOn="UserPool",
+                ClientName=Join("", [Ref(p.deployment_id), "-web"]),
                 # RefreshTokenValidity=30,
                 GenerateSecret=False,
                 UserPoolId=Ref(self.user_pool),

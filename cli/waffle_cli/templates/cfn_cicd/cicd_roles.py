@@ -98,10 +98,10 @@ class CicdRoles:
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-CodeBuildService-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-CodeBuildService",
                             ],
                         ),
                     )
@@ -186,10 +186,6 @@ class CicdRoles:
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        # The CodePipelineServiceRole assumes
-                                        # the DeployCfnRole and DeployCfnChangeSetRole
-                                        # in order to be able to deploy. The following
-                                        # is required for that to work:
                                         "iam:PassRole",
                                     ],
                                     "Resource": [
@@ -255,10 +251,10 @@ class CicdRoles:
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-DeployCloudformation-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-DeployCloudformation",
                             ],
                         ),
                     )
@@ -326,8 +322,6 @@ class CicdRoles:
                                         "cloudwatch:*",
                                         "sns:*",
                                         "cloudformation:*",
-                                        # "rds:*",
-                                        # "sqs:*",
                                     ],
                                     "Resource": "*",
                                 },
@@ -358,10 +352,10 @@ class CicdRoles:
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-CodePipelineService-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-CodePipelineService",
                             ],
                         ),
                     )

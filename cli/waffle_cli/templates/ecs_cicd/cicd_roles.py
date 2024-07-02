@@ -119,10 +119,10 @@ class CicdRoles:
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-CodeBuildService-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-CodeBuildService",
                             ],
                         ),
                     )
@@ -190,9 +190,6 @@ class CicdRoles:
                                         "cloudwatch:*",
                                         "ecs:*",
                                         "sns:*",
-                                        "cloudformation:*",
-                                        "rds:*",
-                                        "sqs:*",
                                     ],
                                     "Resource": "*",
                                 },
@@ -209,23 +206,15 @@ class CicdRoles:
                                     ],
                                     "Resource": "*",
                                 },
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "lambda:InvokeFunction",
-                                        "lambda:ListFunctions",
-                                    ],
-                                    "Resource": "*",
-                                },
                             ],
                         },
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-CodePipelineService-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-CodePipelineService",
                             ],
                         ),
                     )
@@ -281,43 +270,13 @@ class CicdRoles:
                         PolicyName=Join(
                             "",
                             [
+                                "Waffle-TaskExecutionRole-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),
-                                "-TaskExecutionRole",
                             ],
                         ),
                     )
                 ],
             )
         )
-
-        # NOTE: this doc is related, but very confusing:
-        # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html
-        # It talks about the AWSServiceRoleForECS service-role of ECS,
-        # but examples show that the name of the role to
-        # assume is actually AmazonEC2ContainerServiceRole
-        # which is never mentioned in this doc.
-
-        # NOTE: might be useful for ECS service and task roles:
-        # https://serverfault.com/questions/854413/confused-by-the-role-requirement-of-ecs
-        # self.service_role = t.add_resource(iam.Role(
-        #  "ServiceRole",
-        #  AssumeRolePolicyDocument=Policy(
-        #    Statement=[
-        #      Statement(
-        #        Effect=Allow,
-        #        Action=[AssumeRole],
-        #        Principal=Principal(
-        #          "Service",
-        #          ["ecs.amazonaws.com"]
-        #        )
-        #      )
-        #    ]
-        #  ),
-        #  Path="/",
-        #  ManagedPolicyArns=[
-        #    "arn:aws:iam::aws:policy"
-        #    "/service-role/AmazonEC2ContainerServiceRole"
-        #  ]
-        # ))
