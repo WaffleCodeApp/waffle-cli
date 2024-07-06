@@ -18,7 +18,7 @@ class UserPool:
     def __init__(self, t: Template, p: Parameters, r: Roles, c: Conditions):
         self.user_pool = t.add_resource(
             cognito.UserPool(
-                "UserPool",
+                "MFAUserPool",
                 AdminCreateUserConfig=cognito.AdminCreateUserConfig(
                     AllowAdminCreateUserOnly=If(
                         c.allow_admin_create_user_only, True, False
@@ -46,14 +46,12 @@ class UserPool:
                         Required=False,
                         Mutable=True,
                         AttributeDataType="String",
-                        DeveloperOnlyAttribute=True,
                     ),
                     cognito.SchemaAttribute(
                         Name="organization",
                         Required=False,
                         Mutable=True,
                         AttributeDataType="String",
-                        DeveloperOnlyAttribute=True,
                     ),
                 ],
                 UsernameAttributes=["email"],
@@ -64,10 +62,26 @@ class UserPool:
         self.web_client = t.add_resource(
             cognito.UserPoolClient(
                 "UserPoolClientWeb",
-                DependsOn="UserPool",
+                DependsOn="MFAUserPool",
                 ClientName=Join("", [Ref(p.deployment_id), "-web"]),
-                # RefreshTokenValidity=30,
                 GenerateSecret=False,
+                # NOTE: The following would allow to have the custom attributes
+                # in the identity token. But it requires a more settings, including
+                # changing the authentication flow. Instead, skipping this info
+                # from the identity token for now, and querying the details from
+                # cognito using the AWS API at every request on the backend.
+                # AllowedOAuthScopes=["profile"],
+                # AllowedOAuthFlowsUserPoolClient=True,
+                # AllowedOAuthFlows=["code"],
+                ReadAttributes=[
+                    "email",
+                    "email_verified",
+                    "name",
+                    "picture",
+                    "custom:role",
+                    "custom:organization",
+                ],
+                WriteAttributes=["email", "name", "picture"],
                 UserPoolId=Ref(self.user_pool),
             )
         )
