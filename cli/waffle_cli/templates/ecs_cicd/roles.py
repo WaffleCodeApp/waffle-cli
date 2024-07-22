@@ -78,18 +78,14 @@ class Roles:
                                     "Resource": If(
                                         c.custom_user_pool_arn,
                                         Ref(p.user_pool_arn),
-                                        If(
-                                            c.create_userpool_selected,
-                                            ImportValue(
-                                                Join(
-                                                    "",
-                                                    [
-                                                        Ref(p.deployment_id),
-                                                        "-AuthUserPoolArn",
-                                                    ],
-                                                )
-                                            ),
-                                            "",
+                                        ImportValue(
+                                            Join(
+                                                "",
+                                                [
+                                                    Ref(p.deployment_id),
+                                                    "-AuthUserPoolArn",
+                                                ],
+                                            )
                                         ),
                                     ),
                                 },

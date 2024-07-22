@@ -39,7 +39,9 @@ class VpcLink:
                 ],
                 SecurityGroupEgress=[
                     ec2.SecurityGroupRule(
-                        SourceSecurityGroupId=GetAtt(csg.alb_security_group, "GroupId"),
+                        DestinationSecurityGroupId=GetAtt(
+                            csg.alb_security_group, "GroupId"
+                        ),
                         FromPort=1,
                         ToPort=65535,
                         IpProtocol="tcp",

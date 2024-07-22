@@ -1,7 +1,10 @@
 from argparse import ArgumentParser
 from typing import Any
 
-from templates.ecs_cicd import generate_ecs_cicd_stack_json, generate_ecs_parameter_list
+from ..templates.ecs_cicd import (
+    generate_ecs_cicd_stack_json,
+    generate_ecs_parameter_list,
+)
 
 from ..application_logic.entities.cfn_stack_state import CfnStackState
 from ..application_logic.entities.deployment_setting import DeploymentSetting

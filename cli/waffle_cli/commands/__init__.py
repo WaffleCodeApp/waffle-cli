@@ -2,6 +2,7 @@ from .command_type import Command
 from .create_deployment_wizard import CreateDeploymentWizard
 from .create_frontend_wizard import CreateFrontendWizard
 from .create_cloudformation_wizard import CreateCloudFormationWizard
+from .create_backend_service_wizard import CreateBackendServiceWizard
 
 from .create_deployment_settings import CreateDeploymentSettings
 from .list_deployments import ListDeployments
@@ -20,6 +21,7 @@ COMMANDS: list[Command] = [
     CreateDeploymentWizard(),
     CreateFrontendWizard(),
     CreateCloudFormationWizard(),
+    CreateBackendServiceWizard(),
     CreateDeploymentSettings(),
     ListDeployments(),
     #

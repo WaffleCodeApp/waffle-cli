@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import re
 from typing import Any
 
-from commands.deploy_ecs import DeployEcs
+from .deploy_ecs import DeployEcs
 
 from ..application_logic.gateway_interfaces import Gateways
 from ..gateways import gateway_implementations
@@ -46,7 +46,7 @@ class CreateBackendServiceWizard(Command):
 
         print(
             BOLD
-            + "To which deployment do you want to install a frontend?\n\n"
+            + "To which deployment do you want to install a containerized backend service?\n\n"
             + NEUTRAL
             + "The following deployments were found:\n"
             + "\n".join([f"\t- {d}" for d in deployment_ids])
@@ -105,4 +105,5 @@ class CreateBackendServiceWizard(Command):
             github_repo_name=github_repo_name,
             github_branch=github_branch,
             buildspec_path=buildspec_path,
+            instance_count="0",
         )
