@@ -106,4 +106,5 @@ class CreateBackendServiceWizard(Command):
             github_branch=github_branch,
             buildspec_path=buildspec_path,
             instance_count="0",
+            user_pool_arn="*",
         )

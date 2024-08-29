@@ -1,3 +1,4 @@
+from .set_deployment_defaults import SetDeploymentDefaults
 from .command_type import Command
 from .create_deployment_wizard import CreateDeploymentWizard
 from .create_frontend_wizard import CreateFrontendWizard
@@ -15,6 +16,8 @@ from .deploy_api import DeployApi
 from .deploy_alerts import DeployAlerts
 from .deploy_github import DeployGithub
 from .deploy_deployment import DeployDeployment
+
+from .deploy_cdn import DeployCdn
 from .generate_templates import GenerateTemplates
 
 COMMANDS: list[Command] = [
@@ -24,7 +27,7 @@ COMMANDS: list[Command] = [
     CreateBackendServiceWizard(),
     CreateDeploymentSettings(),
     ListDeployments(),
-    #
+    SetDeploymentDefaults(),
     ConfigureAwsProfile(),
     ConfigureDeploymentDomain(),
     CreateDeploymentCertificate(),
@@ -35,6 +38,7 @@ COMMANDS: list[Command] = [
     DeployGithub(),
     DeployDeployment(),
     GenerateTemplates(),
+    DeployCdn(),
 ]
 
 

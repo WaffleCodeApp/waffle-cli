@@ -1,0 +1,9 @@
+{
+  "deployment_id": "dev",
+  "aws_region": "us-east-1",
+  "default_log_retention_days": 7,
+  "default_alarms_enabled": false,
+  "default_db_backup_retention": 7,
+  "default_require_manual_cicd_approval": false,
+  "full_domain_name": "dev.wafflecode.app"
+}

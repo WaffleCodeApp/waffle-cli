@@ -1,4 +1,5 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
+    GetAtt,
     Join,
     Ref,
     iam,
@@ -9,6 +10,7 @@ from awacs.sts import AssumeRole
 
 from .parameters import Parameters
 from .artifacts_bucket import ArtifactsBucket
+from .roles import Roles
 
 
 class CicdRoles:
@@ -16,7 +18,7 @@ class CicdRoles:
     codepipeline_role: iam.Role
     execution_role: iam.Role
 
-    def __init__(self, t: Template, p: Parameters, ab: ArtifactsBucket):
+    def __init__(self, t: Template, p: Parameters, ab: ArtifactsBucket, r: Roles):
         self.codebuild_role = t.add_resource(
             iam.Role(
                 "CodeBuildServiceRole",
@@ -130,6 +132,65 @@ class CicdRoles:
             )
         )
 
+        self.execution_role = t.add_resource(
+            iam.Role(
+                "ExecutionRole",
+                ManagedPolicyArns=[
+                    "arn:aws:iam::aws:policy/service-role/"
+                    "AmazonECSTaskExecutionRolePolicy",
+                    # Accessing ECR
+                    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+                    # Accessing docker images in S3 (belongs to ECR)
+                    "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+                    # TODO: which one is needed?
+                    "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess",
+                    "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess",
+                ],
+                AssumeRolePolicyDocument=Policy(
+                    Statement=[
+                        Statement(
+                            Effect=Allow,
+                            Action=[AssumeRole],
+                            Principal=Principal("Service", ["ecs-tasks.amazonaws.com"]),
+                        )
+                    ]
+                ),
+                Path="/",
+                # Experimentational part:
+                # NOTE: checkout https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html
+                Policies=[
+                    iam.Policy(
+                        PolicyDocument={
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ecr:GetAuthorizationToken",
+                                        "ecr:BatchCheckLayerAvailability",  # TODO: restrict to this vpc
+                                        "ecr:GetDownloadUrlForLayer",  # TODO: restrict to this vpc
+                                        "ecr:BatchGetImage",  # TODO: restrict to this vpc
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents",
+                                    ],
+                                    "Resource": "*",
+                                }
+                            ],
+                        },
+                        PolicyName=Join(
+                            "",
+                            [
+                                "Waffle-TaskExecutionRole-",
+                                Ref(p.deployment_id),
+                                "-",
+                                Ref(p.pipeline_id),
+                            ],
+                        ),
+                    )
+                ],
+            )
+        )
+
         self.codepipeline_role = t.add_resource(
             iam.Role(
                 "CodePipelineServiceRole",
@@ -187,6 +248,16 @@ class CicdRoles:
                                 {
                                     "Effect": "Allow",
                                     "Action": [
+                                        "iam:PassRole",
+                                    ],
+                                    "Resource": [
+                                        GetAtt(r.task_role, "Arn"),
+                                        GetAtt(self.execution_role, "Arn"),
+                                    ],
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
                                         "cloudwatch:*",
                                         "ecs:*",
                                         "sns:*",
@@ -212,65 +283,6 @@ class CicdRoles:
                             "",
                             [
                                 "Waffle-CodePipelineService-",
-                                Ref(p.deployment_id),
-                                "-",
-                                Ref(p.pipeline_id),
-                            ],
-                        ),
-                    )
-                ],
-            )
-        )
-
-        self.execution_role = t.add_resource(
-            iam.Role(
-                "ExecutionRole",
-                ManagedPolicyArns=[
-                    "arn:aws:iam::aws:policy/service-role/"
-                    "AmazonECSTaskExecutionRolePolicy",
-                    # Accessing ECR
-                    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-                    # Accessing docker images in S3 (belongs to ECR)
-                    "arn:aws:iam::aws:policy/AmazonS3FullAccess",
-                    # TODO: which one is needed?
-                    "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess",
-                    "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess",
-                ],
-                AssumeRolePolicyDocument=Policy(
-                    Statement=[
-                        Statement(
-                            Effect=Allow,
-                            Action=[AssumeRole],
-                            Principal=Principal("Service", ["ecs-tasks.amazonaws.com"]),
-                        )
-                    ]
-                ),
-                Path="/",
-                # Experimentational part:
-                # NOTE: checkout https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html
-                Policies=[
-                    iam.Policy(
-                        PolicyDocument={
-                            "Version": "2012-10-17",
-                            "Statement": [
-                                {
-                                    "Effect": "Allow",
-                                    "Action": [
-                                        "ecr:GetAuthorizationToken",
-                                        "ecr:BatchCheckLayerAvailability",  # TODO: restrict to this vpc
-                                        "ecr:GetDownloadUrlForLayer",  # TODO: restrict to this vpc
-                                        "ecr:BatchGetImage",  # TODO: restrict to this vpc
-                                        "logs:CreateLogStream",
-                                        "logs:PutLogEvents",
-                                    ],
-                                    "Resource": "*",
-                                }
-                            ],
-                        },
-                        PolicyName=Join(
-                            "",
-                            [
-                                "Waffle-TaskExecutionRole-",
                                 Ref(p.deployment_id),
                                 "-",
                                 Ref(p.pipeline_id),

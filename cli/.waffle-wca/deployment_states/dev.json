@@ -1,0 +1,72 @@
+{
+  "deployment_id": "dev",
+  "template_bucket_name": "dev-wafflecode-app-4fc7cbd0-7e87-3cbe-9760-d8aa04be0c88",
+  "generic_certificate_arn": "arn:aws:acm:us-east-1:948939170092:certificate/2ee1d9b9-15ea-442d-95a3-232a6b61f2ce",
+  "stacks": [
+    {
+      "stack_id": "waffle-vpc",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-vpc/04bf9de0-35c9-11ef-9e06-0affdf1a9c81",
+      "stack_type": "vpc"
+    },
+    {
+      "stack_id": "waffle-api",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-api/8144e7d0-35c9-11ef-90a0-0e7aa2f0e389",
+      "stack_type": "api"
+    },
+    {
+      "stack_id": "waffle-auth-userpool",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-auth-userpool/e03f5730-35cd-11ef-88f5-0affdaa413bd",
+      "stack_type": "auth"
+    },
+    {
+      "stack_id": "waffle-alerts",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-alerts/4e7dff30-35ce-11ef-938b-0e4ed6c4db93",
+      "stack_type": "alerts"
+    },
+    {
+      "stack_id": "waffle-github",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-github/70248a40-35cf-11ef-8774-0ebf9939def7",
+      "stack_type": "github"
+    },
+    {
+      "stack_id": "waffle-deployment",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-deployment/2ae9cbf0-3630-11ef-a4be-0affd925f63d",
+      "stack_type": "deployment"
+    },
+    {
+      "stack_id": "waffle-cicd-cfn-wcaalerts",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-cicd-cfn-wcaalerts/29ee44f0-3bc2-11ef-9768-0afffaaf6649",
+      "stack_type": "cdn_cicd"
+    },
+    {
+      "stack_id": "waffle-cicd-cfn-wcabackendgateway",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-cicd-cfn-wcabackendgateway/3c909fe0-3bc2-11ef-b738-0e54b4e96aa7",
+      "stack_type": "cdn_cicd"
+    },
+    {
+      "stack_id": "waffle-cicd-cdn-wcafrontend",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-cicd-cdn-wcafrontend/4c31a1b0-3bc2-11ef-a75f-0e06734e2e5d",
+      "stack_type": "cdn_cicd"
+    },
+    {
+      "stack_id": "waffle-cicd-ecs-demobackend",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-cicd-ecs-demobackend/326502e0-4ee6-11ef-a391-0afff50ea2db",
+      "stack_type": "cdn_cicd"
+    },
+    {
+      "stack_id": "waffle-cicd-cdn-demofrontend",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-cicd-cdn-demofrontend/3fa19260-4ee7-11ef-a796-0eb66552f961",
+      "stack_type": "cdn_cicd"
+    },
+    {
+      "stack_id": "waffle-cicd-cfn-demobackendgateway",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-cicd-cfn-demobackendgateway/7d6c5bc0-4ee7-11ef-ba11-126f6e711bf7",
+      "stack_type": "cdn_cicd"
+    },
+    {
+      "stack_id": "waffle-cicd-cfn-demoalerts",
+      "cfn_stack_id": "arn:aws:cloudformation:us-east-1:948939170092:stack/waffle-cicd-cfn-demoalerts/b300c1a0-4ef5-11ef-bba4-0ef047ebb8a9",
+      "stack_type": "cdn_cicd"
+    }
+  ]
+}

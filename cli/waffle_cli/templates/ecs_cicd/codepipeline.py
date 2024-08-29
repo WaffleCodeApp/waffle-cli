@@ -29,6 +29,7 @@ class CodePipeline:
             codepipeline.Pipeline(
                 "Pipeline",
                 DependsOn=["Project"],
+                Name=Join("", [Ref(p.deployment_id), "-", Ref(p.pipeline_id)]),
                 RoleArn=GetAtt(cr.codepipeline_role, "Arn"),
                 RestartExecutionOnUpdate=True,
                 Stages=[

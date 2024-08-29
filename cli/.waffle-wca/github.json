@@ -1,0 +1,48 @@
+{
+ "Outputs": {
+  "GithubSecretArn": {
+   "Description": "The arn of the github_secret",
+   "Export": {
+    "Name": {
+     "Fn::Join": [
+      "",
+      [
+       {
+        "Ref": "DeploymentId"
+       },
+       "-GithubSecretArn"
+      ]
+     ]
+    }
+   },
+   "Value": {
+    "Ref": "GithubSecret"
+   }
+  }
+ },
+ "Parameters": {
+  "DeploymentId": {
+   "Description": "deployment_id",
+   "Type": "String"
+  }
+ },
+ "Resources": {
+  "GithubSecret": {
+   "Properties": {
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       {
+        "Ref": "DeploymentId"
+       },
+       "-github"
+      ]
+     ]
+    },
+    "SecretString": "{\"github_access_token\":\"\"}"
+   },
+   "Type": "AWS::SecretsManager::Secret"
+  }
+ }
+}

@@ -31,7 +31,7 @@ def generate_ecs_cicd_stack_json() -> str:
     roles = Roles(t, params, conditions, secret)
 
     artifacts_bucket = ArtifactsBucket(t)
-    cicd_roles = CicdRoles(t, params, artifacts_bucket)
+    cicd_roles = CicdRoles(t, params, artifacts_bucket, roles)
     ArtifactsBucketPolicy(t, artifacts_bucket, cicd_roles)
     ecr_repositoty = EcrRepositoty(t, cicd_roles)
     cicd_security_groups = CicdSecurityGroups(t, params, conditions, security_groups)

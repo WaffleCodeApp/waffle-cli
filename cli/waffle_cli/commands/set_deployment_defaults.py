@@ -47,12 +47,14 @@ class SetDeploymentDefaults(Command):
             help="Log retention to setting to be used by the stacks and components that are deployed with waffle. Default: 365",
             required=False,
             type=int,
+            default=365,
             choices=[0, 7, 365],
         )
         parser.add_argument(
             "--default_alarms_enabled",
             help="Shall the stacks and components that are deployed with waffle trigger CloudWatch alarms? Default: True",
             required=False,
+            default=True,
             choices=["True", "False"],
         )
         parser.add_argument(
@@ -60,6 +62,7 @@ class SetDeploymentDefaults(Command):
             help="Backup retention to setting to be used by databases that are deployed with waffle. Default: 35",
             required=False,
             type=int,
+            default=35,
             choices=[0, 7, 35],
         )
         parser.add_argument(
