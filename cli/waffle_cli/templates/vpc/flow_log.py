@@ -27,13 +27,14 @@ class FlowLog:
         role = t.add_resource(
             iam.Role(
                 "VPCFlowLogRole",
+                RoleName=Join("", ["Waffle-", Ref(p.deployment_id), "-VPCFlowLogRole"]),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
                             Effect=Allow,
                             Action=[AssumeRole],
                             Principal=Principal("Service", ["ec2.amazonaws.com"]),
-                        )
+                        ),
                     ]
                 ),
                 Path="/",
