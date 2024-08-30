@@ -15,7 +15,7 @@ def generate_api_stack_json() -> str:
     params = Parameters(t)
     api_gw = ApiGateway(t, params)
     Routes(t, params, api_gw)
-    Roles(t)
+    Roles(t, params)
     d = Deployment(t, api_gw)
     UsagePlan(t, api_gw, d)
     Outputs(t, api_gw, params, d)

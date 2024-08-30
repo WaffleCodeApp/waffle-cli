@@ -1,20 +1,24 @@
 from troposphere import (  # pyright: ignore[reportMissingTypeStubs]
     GetAtt,
+    Join,
+    Ref,
+    Template,
     apigateway,
     iam,
-    Template,
 )
 from awacs.aws import Allow, Statement, Principal, Policy
 from awacs.sts import AssumeRole
+from .parameters import Parameters
 
 
 class Roles:
     logging_role: iam.Role
 
-    def __init__(self, t: Template):
+    def __init__(self, t: Template, p: Parameters):
         self.logging_role = t.add_resource(
             iam.Role(
                 "LoggingRole",
+                RoleName=Join("", ["Waffle-", Ref(p.deployment_id), "-api-LogRole"]),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
