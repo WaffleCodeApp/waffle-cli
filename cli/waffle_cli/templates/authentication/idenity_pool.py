@@ -42,6 +42,14 @@ class IdentityPool:
         self.auth_role = t.add_resource(
             iam.Role(
                 "AuthRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-authentication-userpool-AuthRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(

@@ -18,6 +18,14 @@ class Roles:
         self.sns_role = t.add_resource(
             iam.Role(
                 "AuthSnsRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-authentication-userpool-SnsRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
@@ -52,6 +60,14 @@ class Roles:
         self.user_pool_role = t.add_resource(
             iam.Role(
                 "AuthUserPoolRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-authentication-userpool-LambdaRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
