@@ -21,6 +21,14 @@ class Roles:
         self.task_role = t.add_resource(
             iam.Role(
                 "TaskRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-ecs-cicd-TaskRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(

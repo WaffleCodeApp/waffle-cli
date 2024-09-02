@@ -19,7 +19,7 @@ def generate_db_stack_json() -> str:
     db_subnet_group = DbSubnetGroup(t, params, conditions)
     secret = Secret(t, params)
     db_kms_key = DbKmsKey(t)
-    monitoring_role = MonitoringRole(t, conditions)
+    monitoring_role = MonitoringRole(t, conditions, params)
     db_parameter_group = DbParameterGroup(t, params, conditions)
     aurora_cluster = AuroraCluster(
         t,

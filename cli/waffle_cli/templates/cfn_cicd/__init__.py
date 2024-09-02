@@ -9,6 +9,7 @@ from .cicd_roles import CicdRoles
 from .codebuild_project import CodebuildProject
 from .codepipeline import CodePipeline
 from .artifacts_bucket_policy import ArtifactsBucketPolicy
+from .outputs import Outputs
 
 
 def generate_cfn_cicd_stack_json() -> str:
@@ -22,6 +23,7 @@ def generate_cfn_cicd_stack_json() -> str:
     CodebuildProject(t, params, conditions, artifacts_bucket, roles, secret, cicd_roles)
     CodePipeline(t, params, conditions, artifacts_bucket, cicd_roles)
     ArtifactsBucketPolicy(t, artifacts_bucket, cicd_roles)
+    Outputs(t, params)
 
     return t.to_json()
 

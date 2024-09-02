@@ -23,6 +23,14 @@ class CicdRoles:
         self.codebuild_role = t.add_resource(
             iam.Role(
                 "CodeBuildServiceRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-cdn-cicd-CodeBuildRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
@@ -112,6 +120,14 @@ class CicdRoles:
         self.deploy_cfn_changeset_role = t.add_resource(
             iam.Role(
                 "DeployCfnChangeSetRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-cdn-cicd-CodePipelineDeployChangeSetRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
@@ -133,6 +149,14 @@ class CicdRoles:
         self.deploy_cfn_role = t.add_resource(
             iam.Role(
                 "DeployCfnRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-cdn-cicd-CodePipelineDeployRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
@@ -265,6 +289,14 @@ class CicdRoles:
         self.codepipeline_role = t.add_resource(
             iam.Role(
                 "CodePipelineServiceRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-cfn-cicd-CodePipelineRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(

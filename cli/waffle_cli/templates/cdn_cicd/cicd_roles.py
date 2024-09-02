@@ -21,6 +21,14 @@ class CicdRoles:
         self.codebuild_role = t.add_resource(
             iam.Role(
                 "CodeBuildServiceRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-cdn-cicd-CodeBuildRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
@@ -101,6 +109,14 @@ class CicdRoles:
         self.codepipeline_role = t.add_resource(
             iam.Role(
                 "CodePipelineServiceRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-cdn-cicd-CodePipelineRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(

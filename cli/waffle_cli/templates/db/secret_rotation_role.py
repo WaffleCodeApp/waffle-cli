@@ -17,6 +17,14 @@ class SecretRotationRole:
         self.role = t.add_resource(
             iam.Role(
                 "CreateSecretRotationLambdaRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-db-SecretRotationRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(

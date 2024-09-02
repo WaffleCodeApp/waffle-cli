@@ -56,3 +56,23 @@ class Outputs:
                 Description="The name of the secret with the credentials of the db",
             )
         )
+
+        t.add_output(
+            [
+                Output(
+                    "StackExists",
+                    Value="True",
+                    Export=Export(
+                        name=Join(
+                            "",
+                            [
+                                "Waffle-db-",
+                                Ref(p.deployment_id),
+                                "-",
+                                Ref(p.database_id),
+                            ],
+                        )
+                    ),
+                ),
+            ]
+        )

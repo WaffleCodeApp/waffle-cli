@@ -11,6 +11,7 @@ from .artifacts_bucket_policy import ArtifactsBucketPolicy
 from .logging_bucket import LoggingBucket
 from .distribution import Distribution
 from .routes import Routes
+from .outputs import Outputs
 
 
 def generate_cdn_cicd_stack_json() -> str:
@@ -26,6 +27,7 @@ def generate_cdn_cicd_stack_json() -> str:
     logging_bucket = LoggingBucket(t)
     distribution = Distribution(t, conditions, params, logging_bucket, web_bucket)
     Routes(t, params, distribution)
+    Outputs(t, params)
 
     return t.to_json()
 

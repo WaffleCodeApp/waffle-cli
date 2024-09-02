@@ -57,3 +57,23 @@ class Outputs:
                 Description="The hostname of the deployed application load balancer",
             )
         )
+
+        t.add_output(
+            [
+                Output(
+                    "StackExists",
+                    Value="True",
+                    Export=Export(
+                        name=Join(
+                            "",
+                            [
+                                "Waffle-ecs-cicd-",
+                                Ref(p.deployment_id),
+                                "-",
+                                Ref(p.pipeline_id),
+                            ],
+                        )
+                    ),
+                ),
+            ]
+        )

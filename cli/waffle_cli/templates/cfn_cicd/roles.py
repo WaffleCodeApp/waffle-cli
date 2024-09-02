@@ -20,6 +20,14 @@ class Roles:
         t.add_resource(
             iam.Role(
                 "CloudWatchLoggingRole",
+                RoleName=Join(
+                    "",
+                    [
+                        "Waffle-",
+                        Ref(p.deployment_id),
+                        "-cfn-cicd-LogRole",
+                    ],
+                ),
                 AssumeRolePolicyDocument=Policy(
                     Statement=[
                         Statement(
